@@ -1,0 +1,29 @@
+importFrom("reshape2", "melt", "acast", "dcast")
+importFrom("lme4", "lmer", "fixef", "isSingular")
+##importFrom("lmerTest", "lmer", "ls_means", "contest1D")
+importFrom("nls.multstart", "nls_multstart")
+importFrom("R.utils", "wrap.array")
+importFrom("pracma", "gammainc")
+importFrom("emmeans", "emmeans", "regrid", "joint_tests", "contrast")
+importFrom("multcomp", "glht", "mcp")
+importFrom("MASS", "rlm")
+importFrom("utils", "head", "tail")
+
+import("grDevices")
+import("stats")
+import("lattice")
+import("latticeExtra")
+import("grid")
+import("gridExtra")
+
+S3method("[", "aar") # to avoid dropping certain attributes...
+
+export("checkAAdata", "showRawData",
+       "doPCA", "plotScores", "plotLoadings",
+       "fitWood", "fitWoodAll", "curateFits", "showDataFits",
+       "getAUC", "getHeight", "getTime2Max",
+       "summarizePoIs", "imputePoIs", "trapRule",
+       "extractParameters", "curateParameters", "showParameters",
+       "fitMixedModels", "testPeriodEffect", 
+       "doComparisons", "compareInterventions",
+       "showPoIs", "showCIs", "showCombinedCIs")

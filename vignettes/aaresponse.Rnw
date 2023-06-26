@@ -1,0 +1,920 @@
+\documentclass[a4paper]{article}
+%\VignetteEngine{knitr::knitr_notangle}
+%\VignetteIndexEntry{alsace}
+
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{geometry}
+\usepackage{layout}
+
+\geometry{
+  includeheadfoot,
+  margin=2.54cm
+}
+
+\DeclareGraphicsExtensions{.pdf, .png}
+
+\newcommand{\pkg}[1]{{\normalfont\fontseries{b}\selectfont #1}}
+\newcommand{\proglang}[1]{{\sffamily #1}}
+\newcommand{\code}[1]{{\ttfamily #1}}
+\newcommand{\R}{\proglang{R}}
+
+\newcommand{\bC}{\mbox{\boldmath{$C$}}}
+\newcommand{\bG}{\mbox{\boldmath{$G$}}}
+\newcommand{\bE}{\mbox{\boldmath{$E$}}}
+\newcommand{\bS}{\mbox{\boldmath{$S$}}}
+\newcommand{\bX}{\mbox{\boldmath{$X$}}}
+
+\newcommand{\compresslist}{%
+  \setlength{\itemsep}{1pt}%
+  \setlength{\parskip}{0pt}%
+  \setlength{\parsep}{0pt}%
+}
+
+\renewcommand{\textfraction}{0}
+
+\title{Analysing postprandial amino-acid levels in blood with
+  the ``aaresponse'' package}
+\author{Ron Wehrens \and Jasper Engel}
+
+\begin{document}
+
+<<knitrInitialization,echo=FALSE>>=
+require("knitr", quietly=TRUE)
+opts_chunk$set(prompt = TRUE, highlight = FALSE, comment=NA, 
+               background='transparent', size = 'small', 
+               fig.width=6, fig.height=6, out.width='\\textwidth',
+               dev=c('pdf', 'png'))
+
+rm(list = ls())
+@
+
+<<loadAAresponse,echo=FALSE>>=
+suppressMessages(require(aaresponse, quiet=TRUE))
+require(lattice,quiet = TRUE)
+require(gridExtra,quiet = TRUE)
+@ 
+
+\maketitle
+
+\section{Introduction}
+In the global search for a more sustainable way of feeding the human
+population proteins attract special attention. They are indispensible
+since they provide amino acids, several of which cannot be synthesized
+within the human body (the ``essential amino acids''). Currently we
+see a transition towards more plant-based diets, and many research
+projects are evaluating the potential of plant proteins as amino-acid
+sources. One popular experiment is a controlled cross-over trial in
+which subjects are fed two different protein sources (with one week in
+between), and the amino-acid levels in their blood are monitored for a
+couple of hours after protein consumption. The experiment then should
+lead to estimates of the digestibility of proteins, very often related
+to a standard protein such as whey. For practical background of the
+setup of such experiments, as well as more experimental detail, we
+refer to literature~\citep{Esser2023,Mes2021}, the results of two
+separate but similar research projects.
+
+This vignette serves to describe the \pkg{aaresponse} package, written
+in \R, that allows to analyse such data in a structured and principled
+way. The package is explicitly written so that also scientists with
+only a limited experience with \R\ can run the scripts and interpret
+the results. Data from~\citet{Esser2023} are used as an example, and
+it should be straightforward to reproduce the results in that paper.
+
+This is the general approach: from the time curves of individual amino
+acids in the blood of 
+the test subjects, three parameters of interest (PoIs) are calculated: the
+area under the curve (AUC), the peak height, and the time to the
+maximum of the peak. Each of these PoIs can then be
+used in a mixed model comparing the different protein meals. Small
+blocks of code show the usage of the user-accessible functions, and
+code included in the figures indicates how these figures can be
+produced. The basic workflow and the associated \R\ commands are
+summarized in the code block below (assuming an object \code{testdata}
+to be available). The first stage is checking the raw data for
+completeness, and visualization of the raw data is straightforward,
+both in the form of 
+the raw time series and using Principal Component Analysis (PCA):
+
+<<showCode1,eval=FALSE>>=
+testdata <- checkAAdata(testdata)  ## mandatory!
+showRawData(testdata, type = "participant")
+doPCA(testdata, type = "intervention")
+@
+
+\noindent
+Next, the time series are summarized by fitting parametric curves,
+and inspecting and possibly curating the curve parameters:
+
+<<showCode2,eval=FALSE>>=
+allWoodCurves.uncur <- fitWoodAll(testdata)
+showParameters(allWoordCurves.uncur)
+allWoodCurves <- curateFits(allWoodCurves.uncur)
+showParameters(allWoodCurves)
+showDataFits(testdata, allWoodCurves)
+@
+
+\noindent
+Parameters of interest then can be calculated and visualized easily:
+
+<<showCode3,eval=FALSE>>=
+allParams.uncur <- extractParameters(allWoodCurves)
+allParams <- curateParameters(allParams.uncur)
+## Values for individual participants:
+showParameters(allParams)
+## Aggregated values:
+showPoIs(AUC = summarizePoIs(allParams, "AUC"),
+         Height = summarizePoIs(allParams, "Height"),
+         Time2Max = summarizePoIs(allParams, "Time2Max"))
+
+@
+
+\noindent
+In some cases the pipeline ends here: the end result is a table of
+PoIs, containing also confidence intervals and p values. If comparison
+with a reference is the goal of the investigation, this can be done as
+an additional step:
+
+<<showCode4,eval=FALSE>>=
+finalResult <- compareInterventions(allParams, target = "AUC",
+                                    logTransform = TRUE)
+showCIs(finalResult)
+@ 
+
+\noindent
+The outcome is shown as plots of confidence intervals, which are much
+more informative than just p values. Additional functionality is
+described in the following sections. Consult the man pages for full
+information.
+
+%\clearpage
+
+\section{Data}
+The \pkg{aaresponse} package comes with an data set obtained from an
+experiment in which two proteins, \code{BP} and \code{CP} (bovine
+plasma and corn protein, respectively, are compared to
+the \code{WP} (whey protein) standard~\citep{Esser2023}.
+The structure of the data is quite simple: it is a \code{data.frame} in
+which amino-acid levels are given for each participant, protein menu
+and week, for a number of time points. Required column names are
+\code{Participant}, \code{Period}, \code{Intervention}, \code{Time}, and
+any number of columns corresponding to amino acids of interest. Here
+is the top of the data object:
+
+<<showData>>=
+data(supro)
+head(supro[,1:12], 10)
+@ 
+
+\noindent
+Only the first few amino-acid columns are shown; in total, data for 19
+different amino acids are available.
+Since data sets are often assembled manually with the
+corresponding risks of errors a special function has been created to
+check whether the required columns are present:
+
+<<checkSupro>>=
+supro <- checkAAdata(supro)
+@
+
+\noindent
+The function presents a short summary of the data, and checks for some
+potential problems such as missing information -- when the package
+will be used with more diverse data this function might well be
+extended. In this case the only worrysome element is the distribution
+of the proteins over the periods in which the meals are administered
+-- the second period contains few \code{CP} shakes and the third few
+\code{BP} shakes. Such situations are quite common in practice because
+of, \emph{e.g.}, participant dropout.
+
+Note that the \code{checkAAdata} function is mandatory for the other
+functions in the package to work correctly -- apart from checking a
+few basics, it sets the class of the \code{supro} object to
+\code{"aar"}. This has the effect that amino-acid names are coupled to
+the object as attributes, and will not be removed even after
+subsetting the data. The \code{checkAAdata} function takes further
+arguments listing the possible amino-acid names (leaving open, for
+example, the possibility to use the one-letter amino-acid codes, or to
+analyse sums of amino-acid concentrations), and the names of the
+amino-acid totals, by default: \code{c("TAA", "TEAA")}. If other AA
+totals are of interest, they can be defined before calling
+\code{checkAAdata}, and including the name of the totals as an
+argument. Here, we add the combination of leucine, isoleucine and
+valine under the name \code{BCAA}:
+
+<<addTotal,echo=TRUE,cache=TRUE>>=
+supro$BCAA <- supro$Leu + supro$Ile + supro$Val
+supro <- checkAAdata(supro, quiet = TRUE,
+                     totalnames = c("TAA", "TEAA", "BCAA"))
+@ 
+
+%\clearpage
+\section{Visualization}
+The number of participants in this particular study is quite typical,
+and even though it is not very large, getting a good overview is not
+at all trivial. The \pkg{aaresponse} package has a number of support
+functions that show visual summaries. The first is \code{showRawData}
+coming in three flavours corresponding to the value of the \code{type}
+argument. A \code{subset} argument can be used to limit the output to
+specific cases -- we'll use that here to limit the space used by the
+figures. Examples of the three plot types are shown in
+Figures~\ref{fig:raw1}--\ref{fig:raw3} (the \R\ code to generate the
+figure is shown as well).
+
+\begin{figure}[h]
+\centering
+<<raw1,echo=TRUE,cache=TRUE,fig.height=4,fig.width=10,out.width='\\textwidth'>>=
+showRawData(supro, type = "aa",
+            subset = Participant %in% 1:3 & AA %in% c("His", "Leu", "Ser"))
+@
+\caption{Visualization of raw data. Choosing \code{type = "aa"}
+  leads to individual panels for amino acids. Every time series
+  corresponds to one participant/intervention combination.}
+\label{fig:raw1}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<raw2,echo=TRUE,cache=TRUE,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
+showRawData(supro, type = "participant",
+            subset = Participant %in% 1:3 & AA %in% c("His", "Leu", "Ser"))
+@
+\caption{Visualization of raw data. Choosing \code{type = "participant"} will
+  show participants in separate columns. Interventions now are
+  indicated with colors.}
+\label{fig:raw2}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<raw3,echo=TRUE,cache=TRUE,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
+showRawData(supro, type = "sequential",
+            subset = Participant %in% 1:3 & AA %in% c("His", "Leu", "Ser"))
+@
+\caption{Visualization of raw data. Choosing \code{type = "sequential"} will
+  show the time series sequentially.}
+\label{fig:raw3}
+\end{figure}
+
+\clearpage
+In addition to the raw data, several forms of Principal Component
+Analysis (PCA) are supported (only addressing the individual AA data,
+not the totals). These different PCA analyses depend on the way the
+data matrix is set up: in \code{type = "par"}, for example, each row
+is the concatenation of all time series from a participant. At the
+other end of the spectrum, a PCA plot on a matrix where each row is
+one time series from one participant, having consumed one particular
+protein meal, is obtained with \code{type = "both"}.  Again, the
+easiest way to see the differences is to show the corresponding
+examples -- this leads to
+Figures~\ref{fig:pcaSc1}--\ref{fig:pcaL4}. The score plots give the
+possibility to highlight different factors. Note that complex score
+plots are associated with simple loading plots, and vice versa.
+
+Two additional arguments are available for the \code{doPCA} function:
+\code{rcenter} and \code{rscale}. Both are logicals -- setting them to
+\code{TRUE} will lead to normalization of each individual time
+series. Mean-centering each time series is the default of the
+package.
+
+Figures~\ref{fig:pcaSc1} and \ref{fig:pcaL1} are created by the
+following commands:
+
+<<dopcaSc1,eval=FALSE>>=
+PCApar1 <- doPCA(supro, type = "par")
+PCApar2 <- doPCA(supro, type = "par", rcenter = TRUE, rscale = TRUE)
+plotScores(PCApar1)   # Fig 4, left panel
+plotScores(PCApar2)   # Fig 4, right panel
+plotLoadings(PCApar1) # Fig 5, left panel
+plotLoadings(PCApar2) # Fig 5, right panel
+@ 
+
+\noindent
+Comparing the two score plots, several features are retained -- in
+particular the positions on the first PC do not change much. For the
+second PC, however, big differences are observed. In the loading plots
+one can see the effect of the 
+scaling: in the mean-centered data it is clear that the curves for
+\code{WP} have a much bigger amplitude, corresponding to bigger peak heights.
+
+\begin{figure}[tb]
+\centering
+<<pcaSc1,echo=FALSE,cache=TRUE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
+PCApar1 <- doPCA(supro, type = "par")
+pl1 <- plotScores(PCApar1)
+PCApar2 <- doPCA(supro, type = "par", rcenter = TRUE, rscale = TRUE)
+pl2 <- plotScores(PCApar2)
+grid.arrange(pl1, pl2, ncol = 2)
+@
+\caption{Score plot for the \code{"par"} PCA plot -- the data matrix
+  is arranged in such a way that the rows consist of
+  participants. Left panel: mean-centered time series -- right panel: 
+  normalized time series.}
+\label{fig:pcaSc1}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<pcaL1,echo=FALSE,cache=TRUE,fig.height=8,fig.width=14,out.width='\\textwidth'>>=
+pl1 <- plotLoadings(PCApar1)
+pl2 <- plotLoadings(PCApar2)
+grid.arrange(pl1, pl2, ncol = 2)
+@
+\caption{Loading plots for the \code{"par"} PCA plot -- the data matrix
+  is arranged in such a way that the 
+  columns are unique combinations of amino acids, protein meals, and time
+  points. Left panel: mean-centered time series -- right panel:
+  normalized time series.}
+\label{fig:pcaL1}
+\end{figure}
+
+Other types of score and loading plots can be obtained by arranging
+the data matrix differently\footnote{Note that in the remainder of
+  this section we will always use the scaling default, \emph{i.e.},
+  mean-centered time series.}. In \code{type = "pro"}, each row in the
+data matrix contains time series for different amino acids, for the
+same participant - intervention combination. In the score plots this
+can be indicated by the \code{highlight} argument. The right plot
+clearly shows the differences between the interventions, the protein
+meals -- this is the dominating factor on PC1. The left plot is harder
+to interpret because of the larger number of colours. In any case one
+can trace back the exact origin of each point in the plot by the
+combination of the two colouring schemes. The two score plots in
+Figure~\ref{fig:pcaSc2} are created by: 
+
+<<dopcaSc2,eval=FALSE>>=
+PCApro <- doPCA(supro, type = "pro")
+plotScores(PCApro, highlight = "Participant")
+plotScores(PCApro, highlight = "Intervention")
+@
+
+\noindent
+The corresponding loading plot, in Figure~\ref{fig:pcaL2}, shows that
+each component is a set of 19 time series, one for each amino acid.
+
+\begin{figure}[tb]
+\centering
+<<pcaSc2,echo=FALSE,cache=TRUE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
+PCApro <- doPCA(supro, type = "pro")
+pl1 <- plotScores(PCApro, highlight = "Participant")
+pl2 <- plotScores(PCApro, highlight = "Intervention", nrowLegend = 3)
+grid.arrange(pl1, pl2, ncol = 2)
+@
+\caption{Score plots for the \code{"pro"} PCA plot -- rows consist
+  of participant-protein combinations. The two plots differ only in
+  the colouring of the points.}
+\label{fig:pcaSc2}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<pcaL2,echo=FALSE,cache=TRUE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+plotLoadings(PCApro)
+@
+\caption{Loading plot for the \code{"pro"} PCA plot -- 
+  columns are combinations of amino acids and time
+  points.}
+\label{fig:pcaL2}
+\end{figure}
+
+The next set-up is the arrangement where each row in the data matrix,
+and therefore also each symbol in a score plot,
+corresponds to an amino-acid time series for a particular participant
+in several interventions,
+such as the ones shown in Figure~\ref{fig:pcaSc3}, again with two
+different colourings. The amino acids with larger responses
+(\code{Leu}, \code{Gln/Arg}) clearly stand out in the left side of the
+left plot. Similarly, one can see that Participant 7 is located mostly
+in the bottom right area (right plot). The 
+corresponding loading plots, in Figure~\ref{fig:pcaL3}, clearly show the 
+differences between the protein meals: \code{WP} clearly stands out.
+
+\begin{figure}[tb]
+\centering
+<<pcaSc3,echo=FALSE,cache=TRUE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
+PCAaa <- doPCA(supro, type = "aa")
+pl1 <- plotScores(PCAaa, highlight = "AA")
+pl2 <- plotScores(PCAaa, highlight = "Participant", nrowLegend = 4)
+grid.arrange(pl1, pl2, ncol = 2)
+@
+\caption{Score plots for the \code{"aa"} PCA plot -- rows are
+  participant-AA combinations. The same score plot is shown with two
+  different colourings, allowing the unambiguous association of each
+  point with one amino acid and one participant.}
+\label{fig:pcaSc3}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<pcaL3,echo=FALSE,cache=TRUE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+plotLoadings(PCAaa)
+@
+\caption{Loading plot for the \code{"aa"} PCA plot -- columns are
+  merged time series between participants,
+  combinations of protein meals and time points.}
+\label{fig:pcaL3}
+\end{figure}
+
+The final setup is the one where each time series is a row in the data
+matrix on which PCA is performed. The results are shown in
+Figures~\ref{fig:pcaSc4} and \ref{fig:pcaL4}. Again, the default
+scaling method has been used. Again, PC1 discriminates \code{WP} from the
+other two proteins, and the corresponding loading has a regular peak
+shape.
+
+\begin{figure}[tb]
+\centering
+<<pcaSc4,echo=FALSE,cache=TRUE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
+PCAboth <- doPCA(supro, type = "both")
+pl1 <- plotScores(PCAboth, highlight = "Intervention", nrowLegend = 3)
+pl2 <- plotScores(PCAboth, highlight = "Participant")
+grid.arrange(pl1, pl2, ncol = 2)
+@
+\caption{Score plot for the \code{"both"} PCA plot -- rows are time series,
+  combinations of participants, AAs and protein meals. The third
+  possible colouring, showing the amino acids, is not shown.}
+\label{fig:pcaSc4}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<pcaL4,echo=FALSE,cache=TRUE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+plotLoadings(PCAboth)
+@
+\caption{Loading plot for the \code{"both"} PCA plot -- columns are
+  simply time points.}
+\label{fig:pcaL4}
+\end{figure}
+
+\clearpage
+\section{Fitting Wood curves}
+The time profiles for individual amino acids, $y(t)$, can be conveniently
+described by so-called Wood curves~\citep{Wood1967}, originally used
+to describe lactation behaviour in cattle: 
+\[y(t) = d + at^{mc}\exp(-ct)\] 
+Here, the formulation with baseline $d$ is used, also employed in
+\citet{Engel2003}. Since four parameters are estimated, we need at
+least six time points and preferably more; moreover, the accuracy of
+the fit will increase if some of the time points are placed after the
+peak reaches its maximum. 
+
+Given a two-column data frame, the first column containing the time
+values and the second the amino acid levels, the parameters of the
+curve can be determined with the function \code{fitWood}:
+
+<<fitWoodP1,echo=-1>>=
+set.seed(1)
+idx <- supro[,"Participant"] == 1 & supro[,"Period"] == 1
+df <- supro[idx, c("Time", "His")]
+colnames(df) <- c("Time", "value")
+(result <- fitWood(df))
+@
+
+\noindent
+Note that to increase numerical stability, the calculation is using
+quarter hours as time unit, rather than minutes. That means that
+parameter $m$ needs to be interpreted on a different scale than the
+data -- even though $m$ corresponds to the time to the maximum, users
+should look at the extracted PoIs (see the next
+section), rather than at the under-the-hood parameter values.
+The optimization itself is done by non-linear least squares using multiple
+starting points and quite generous optimization boundaries to avoid
+missing the true optimum. The result is a named vector, also containing
+the RMS value of the fit.
+
+Function \code{fitWood} is useful to assess individual cases, but will
+rarely be used directly -- in
+principle one will want to fit all curves in a data set. This can
+be done as follows (for the sake of the example we'll only fit the
+amino-acid totals curves for Participants 1 and 2 and a subset of
+amino acids):
+
+<<fitWood,eval=FALSE>>=
+idx <- supro$Participant == 1 | supro$Participant == 2
+resultP12 <- fitWoodAll(supro[idx, 1:8])
+@ 
+
+<<fitWoodP12, echo=FALSE,cache=TRUE>>=
+<<fitWood>>
+@
+
+\noindent
+The result is a simple data frame (output limited here to two decimal places):
+
+<<fitWoodShow>>=
+format(resultP12[1:6,], digits = 2, nsmall = 2)
+@
+
+\noindent
+Note that argument \code{what} is available limiting the curve
+fitting to either single amino acids, or amino-acid totals (not present
+in the example data set). The default is to fit curves through all
+suitable columns detected.
+
+Since these fits are generated automatically using quite generous
+boundaries, it is possible to obtain results that are not very
+realistic. This can happen when the data do not contain much signal,
+or because of some influential outliers. The most obvious way to
+achieve this would be to look at the quality of the fits, through RMS
+values. However, because of the different levels at which amino acids
+are present in the participants' blood it is hard to define a single
+suitable cutoff for RMS values; attempts to define relative RMS values
+(e.g., an RMS value divided by the mean amino acid level across all
+participants) have disadvantages, too -- in the example given, the
+approach is dependent on who is in the data set, just to name
+one. Rather, we concentrate on the values of four parameters found in
+the fit. A simple function has been included in the package that
+replaces all records that contain parameter values outside feasible
+regions with missing values (\code{NA}). The feasible regions are
+shown by calling the function, \code{curateFits}, without parameters:
+
+<<curateFits>>=
+curateFits()
+resultP12.cur <- curateFits(resultP12)
+@ 
+
+\noindent
+If other values than the defaults need to be used it can simply be
+done by providing boundaries for the parameters \code{a}, \code{m},
+\code{c} and/or \code{d}:
+
+<<curateFitsSpecific,eval=FALSE>>=
+resultP12.cur2 <- curateFits(resultP12, a = c(0, 500), m = c(0, 50))
+@ 
+
+\noindent
+Function \code{curateFits} returns a message mentioning how many
+records have been curated; in the above two examples no outlying cases
+were found.
+
+It is good practice to visually check all curve fits -- if
+strange results are found the fit can be performed manually, perhaps
+starting from different initial values or using a different optimizer.
+Alternatively, the case could be considered lost, and the
+corresponding parameters can be replaced by missing values.
+One possible visualization is provided by
+\code{showDataFits}, that also takes the subset
+argument -- see Figure~\ref{fig:showDataFits}. Such
+plots are particularly useful when zooming in on a few suspect 
+results. An overview of the fitted curves without the data points can
+be illuminating, too, especially when curves are shown without a
+baseline. An example depicting a larger number of amino acids is shown
+in Figure~\ref{fig:showDataFits2}.
+
+\begin{figure}[tb]
+\centering
+<<showDataFits,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
+showDataFits(supro[idx, 1:8], resultP12.cur,
+             subset = AA %in% c("His", "Asn"))
+@
+\caption{Wood curves for two subjects and two AAs, including the
+  measured points.}
+\label{fig:showDataFits}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<showDataFits2,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
+showDataFits(supro[idx, 1:8], resultP12.cur,
+             baseLineCorr = TRUE, points = FALSE)
+@
+\caption{Wood curves for all available AA traces of two subjects,
+  without experimental data, and with extimated baselines subtracted.}
+\label{fig:showDataFits2}
+\end{figure}
+
+<<fitAllParamsReally,echo=FALSE,message=FALSE,cache=TRUE>>=
+resultPall.uncurated <- fitWoodAll(supro, what = "aas")
+resultPall <- curateFits(resultPall.uncurated)
+allParams.uncurated <- extractParameters(resultPall)
+allParams <- curateParameters(allParams.uncurated)
+@
+
+The fitted parameters themselves can be visualized through function
+\code{showParameters}, providing a simple dotplot containing all
+estimated values. Figure~\ref{fig:cFits} shows an example, this time
+using \code{resultPall}, an \R\ object containing the fits for all
+individual amino acids and all participants.
+
+\begin{figure}[tb]
+\centering
+<<cFits,fig.height=4.5,fig.width=10,out.width='\\textwidth'>>=
+showParameters(resultPall, subset = AA %in% c("His", "Asn"))
+@
+\caption{Fitted curve parameters for all \code{His} and \code{Asn}
+  data. Clearly one can see that peaks from Corn come later than from
+  \code{BP}, whereas \code{WP} gives the fastest response: curve parameter $m$
+  corresponds to the time to the peak maximum.}
+\label{fig:cFits}
+\end{figure}
+
+\clearpage
+\section{Extracting parameters of interest}
+From the fitted parameters of the 
+curves, values for the PoIs, the parameters of interest (AUC, time to
+peak and maximum)  
+can be derived analytically~\citep{Rook1993}. The time to peak is given by
+parameter $m$ (as already mentioned, expressed in quarter hours). The
+AUC-value, relative to the baseline $d$, is given 
+by $AUC = {a}/{c^{(b+1)}\Gamma(ct_{f},b+1)}$, where $\Gamma(x,q) =
+\int_{0}^{x} z^{q-1}e^{-z} \,dz$ is the lower incomplete gamma
+function and $t_f$ the time point up to  which the AUC-value should be
+computed. The peak height (relative to baseline $d$) is given by
+$max(y) - d = a(b/c)^{b}e^{-b}$. Three extraction functions are available:
+
+<<extractParameters>>=
+getAUC(resultP12.cur[1,], maxT = 180)
+getHeight(resultP12.cur[1,])
+getTime2Max(resultP12.cur[1,], minutes = TRUE)
+@ 
+
+\noindent
+Note that \code{maxT}, the time up to which the area under the curve
+is integrated, can be later than the latest sampling points. It
+needs to be given in minutes, just like all results shown are in minutes,
+too. For convenience, a wrapper function,
+\code{extractParameters}, is available to collect all relevant
+information in a single data frame:
+
+<<extractParametersWrapper>>=
+paramsP12 <- extractParameters(resultP12.cur, maxT = 180)
+format(paramsP12[1:15,], digits = 2, nsmall = 2)
+@
+
+\noindent
+Again, we can have a closer look to see if the parameters
+of interest have realistic values, and \code{showParameters} can
+again be used. These plots can help in the curation of the data, for which
+\code{curateParameters} is available. It works completely analogous to 
+\code{curateFits}, discussed earlier: 
+
+<<curatePeaks>>=
+curateParameters()
+paramsP12.curated <- curateParameters(paramsP12)
+@ 
+
+\noindent
+One can also plot the curated and uncurated values (using
+\code{showParameters}) to see whether the 
+curation parameters have been appropriate, and if not adjust and
+repeat the curation. A particular case where curation settings need to
+be adapted arises when fitting amino-acid totals; values for AUC and
+peak height are probably much higher, and the default boundaries for
+them may remove too many (or indeed all) values.
+
+Even more insightful plots are shown in Figure~\ref{fig:pois}, where
+the results for individual participants are aggregated and shown with
+the associated confidence intervals. The plot (here again focusing on
+\code{His} and \code{Asn}) is made through the following code:
+
+<<showPoIs,eval=FALSE>>=
+showPoIs(AUC = summarizePoIs(allParams, "AUC"),
+         Height = summarizePoIs(allParams, "Height"),
+         Time2Max = summarizePoIs(allParams, "Time2Max"),
+         subset = AA %in% c("Asn", "His"))
+@
+
+
+\begin{figure}[tb]
+\centering
+<<pois,echo=FALSE,cache=TRUE,fig.height=2.5,fig.width=6,out.width='.6\\textwidth'>>=
+<<showPoIs>>
+@
+\caption{PoI estimates, including 95\% confidence intervals, for two
+  of the amino acids.}
+\label{fig:pois}
+\end{figure}
+
+\noindent
+The \code{summarizePoIs} function can be useful in itself -- for each
+PoI it returns a table with each line containing a specific
+combination of a participant, an intervention, and an amino acid:
+
+<<summarizePois>>=
+head(summarizePoIs(allParams, "AUC"))
+@ 
+
+\section{Comparison with a reference protein}
+Once we are happy with the general quality of the fits and the
+extracted PoIs, we can proceed and compare the proteins with each
+other. The idea is to fit a mixed model with \code{Intervention} and
+\code{Period} as fixed effects (\emph{i.e.}, calculating explicit
+coefficients for these factors) and \code{Participant} as a random
+factor -- indicating that we are not primarily interested in obtaining
+coefficients for each of the people in the panel, but rather wish to
+see them as a sample from the population at large. In Wilkinson-Rogers
+notation this looks as follows:
+
+<<MixModFormula,eval=FALSE>>=
+Param ~ Period + Intervention + (1 | Participant)
+@
+
+\noindent
+The first part, \code{Param}, is the parameter of interest -- choices are \code{AUC}, \code{Time2Max} and
+\code{Height}. In some cases the mixed model described above will give
+a boundary (singular) fit. Then, a simple linear model will be used
+where the random \code{Participant} factor is ignored.
+
+The \code{Period} parameter should in most cases be insignificant --
+even if it shows some significant results the estimates are corrected
+for that (that is the reason to put it in the model in the first
+place). If this has a really consistent significant effect then one
+should look at the data and perhaps the whole design of the experiment.
+
+This is all implemented in function \code{compareInterventions}. The
+function fits the mixed model, and if that is singular, fits a regular
+linear model with two factors, \code{Intervention} and
+\code{Period}). From the result, the estimated marginal means and the
+associated confidence intervals and $p$-values are calculated. The
+latter are calculated for all fixed effects;
+Bonferroni corrections for multiple testing are
+applied, too. Here, we illustrate the function using the full table of
+parameter values, obtained from the fits and curated in the same way
+as above. One difference is that we now use the default AUC cutoff of
+300 minutes. Applying \code{compareInterventions} again is easy:
+
+<<compareInterventions,cache=TRUE,message=FALSE,warning = FALSE>>=
+finalResult <- compareInterventions(allParams, target = "AUC",
+                                    logTransform = TRUE)
+@ 
+
+\noindent
+The result, a simple data frame, looks like this:
+
+<<showComparison>>=
+format(finalResult[1:4,], digits = 2, nsmall = 2)
+@
+
+\noindent
+The meaning of the columns should speak for itself.
+Obviously, such a table is hard to interpret. Therefore, visualization
+in figure format is provided by function \code{showCIs}, as shown in
+Figure~\ref{fig:CIs}. Confidence intervals for the other PoIs are
+shown in Figures~\ref{fig:CIs1}-\ref{fig:CIs3}. CIs in red indicate
+significant deviations from baseline (either 1, if we look at ratios,
+or 0 in case of differences).
+
+\begin{figure}[tb]
+\centering
+<<CIs,echo=TRUE,cache=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+showCIs(finalResult)
+@
+\caption{Visualization of the protein comparisons for the ratios of AUC
+  values.}
+\label{fig:CIs}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<CIs1,echo=TRUE,cache=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+finalResult1 <- compareInterventions(allParams, target = "AUC")
+showCIs(finalResult1)
+@
+\caption{Visualization of the protein comparisons for the differences
+  between AUC values.}
+\label{fig:CIs1}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<CIs2,echo=TRUE,cache=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+finalResult2 <- compareInterventions(allParams, target = "Height")
+showCIs(finalResult2)
+@
+\caption{Visualization of the protein comparisons for the differences
+  in peak height.}
+\label{fig:CIs2}
+\end{figure}
+
+\begin{figure}[tb]
+\centering
+<<CIs3,echo=TRUE,cache=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+finalResult3 <- compareInterventions(allParams, target = "Time2Max")
+showCIs(finalResult3)
+@
+\caption{Visualization of the protein comparisons for the differences
+  in the time to the maximum of the peak.
+}
+\label{fig:CIs3}
+\end{figure}
+
+Although these plots are useful in themselves, sometimes one wishes
+the complete overview. This can be obtained by the auxiliary function
+\code{showCombinedCIs}. The arguments are simply the PoIs one wants to
+include\footnote{Make sure to use named arguments, otherwise the
+  function can do nothing but assume the order of the data objects is
+  the default one...}, and the result is shown in
+Figure~\ref{fig:combinedCIs}. Also here it is possible to provide a
+\code{subset} argument, \emph{e.g.}, focusing on particular amino acids.
+
+\begin{figure}[tb]
+\centering
+<<combinedCIs,fig.height=8,fig.width=10,out.width='\\textwidth'>>=
+showCombinedCIs(lAUC = finalResult, Height = finalResult2,
+                Time2Max = finalResult3)
+@
+\caption{All confidence intervals calculated from the comparison of
+  the proteins with the reference in one plot.}
+\label{fig:combinedCIs}
+\end{figure}
+
+\clearpage
+
+\subsection{Imputation of non-responses}
+In the previous comparison of protein meals, \code{NA} values in the
+PoIs were not taken into account. These \code{NA}s will occur if no
+meaningful curves can be fitted, if curve parameters do not lead to
+PoI values, or if values for curve parameters or PoIs are outside
+permissible regions -- in short, if no meaningful values for PoIs can
+be defined for a particular time series. The effect is that our
+comparison is based only on cases where meaningful values \emph{can
+  be} found -- typically called ``responses, and cases where no effect
+is observed are, obviously, ``non-responses''. The corresponding
+participants are called ``responders'' and
+``non-responders''. Obviously, this has consequences for the way the
+results need to be interpreted: one could argue that no uptake implies
+values of zero for AUC and peak height. The values presented for the
+responders only can be seen as upwardly biased because of the
+selection process.
+
+Obviously, the ``responders-only'' caveat must be made explicit, but
+in some cases one can imagine that an estimate is required for the
+population as a whole, combining responders and non-responders. This
+can be done for AUC and peak height by some form of imputation -- note
+that for the third PoI, time to peak maximum, no meaningful way to do
+this exists. Function \code{imputePoIs} performs this imputation by
+estimating AUC and peak heights from quantiles of the time series
+data. A very good linear correlation exists
+between the difference of the .2 and .8 quintiles and peak height,
+which means we can use that to impute the \code{NA} values. For AUC
+the correlation is less good, but still usable. This works as follows:
+
+<<imputeVals,echo=TRUE,cache=TRUE>>=
+fullPoIs <- imputePoIs(supro, allParams, quant = .2)
+head(fullPoIs)
+@ 
+
+The imputated values and the original PoIs from curve fitting are both
+accessible in the result (with suffixes ``\code{.i}'' and
+``\code{.orig}'', respectively), and are combined in the original PoI
+columns. Figure~\ref{fig:imputedValues} shows the ranges of the two
+PoIs, their correlation with the imputed values, and the distributions
+of the imputed values that are actually used. The latter are very
+small in almost all cases, as they should be.
+
+\begin{figure}[tb]
+\centering
+<<imputedValues,echo=FALSE,cache=TRUE,fig.height=10,fig.width=10,out.width='\\textwidth'>>=
+pl1 <- xyplot(AUC.i ~ AUC.orig, data = fullPoIs,
+              ylab = "Imputed AUC values",
+              xlab = "AUC values from curve fitting")
+pl2 <- xyplot(Height.i ~ Height.orig, data = fullPoIs,
+              ylab = "Imputed Height values",
+              xlab = "Height values from curve fitting")
+pl3 <- bwplot(~ AUC.i, data = fullPoIs, subset = is.na(AUC.orig),
+              xlab = "Imputed AUC values", panel = panel.violin)
+pl4 <- bwplot(~ Height.i, data = fullPoIs, subset = is.na(Height.orig),
+              xlab = "Imputed Height values", panel = panel.violin)
+grid.arrange(pl1, pl2, pl3, pl4, ncol = 2)
+@
+\caption{Top row: fitted against imputed values for \code{AUC} and
+  \code{Height} -- these imputed values are not used since the values
+  based on the curve fits are available.
+  Bottom row: distribution of imputed values corresponding to missing PoIs.}
+\label{fig:imputedValues}
+\end{figure}
+
+<<getImputedCIs, echo=FALSE,cache=TRUE, message=FALSE, warning=FALSE>>=
+finalResulta <- compareInterventions(fullPoIs, target = "AUC",
+                                     logTransform = TRUE)
+finalResult2a <- compareInterventions(fullPoIs, target = "Height")
+@ 
+
+Using these imputed values then leads to the CIs shown in
+Figure~\ref{fig:allCIs}. These are virtually indistingishable from the
+CIs in Figure~\ref{fig:combinedCIs}, mainly because the number of
+missing values in this particular data set is very small. In other
+cases more differences will be visible.
+
+\begin{figure}[tb]
+\centering
+<<allCIs,fig.height=8,fig.width=7,out.width='.7\\textwidth'>>=
+showCombinedCIs(lAUC = finalResulta, Height = finalResult2a)
+@
+\caption{All confidence intervals based on imputed AUC and Height
+  parameters. For \code{Time2Max} no imputation is possible.}
+\label{fig:allCIs}
+\end{figure}
+
+\clearpage
+
+\bibliographystyle{unsrtnat}
+\bibliography{aaresponse}
+
+\clearpage
+\section*{Technical details}
+<<sessionInfo,echo=FALSE>>=
+sessionInfo()
+@ 
+
+\end{document}

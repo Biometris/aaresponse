@@ -1,0 +1,10 @@
+Package: aaresponse
+Type: Package
+Title: Comparison of protein uptake through the analysis of amino-acid levels in blood after a meal
+Description: Functions to fit Wood curves through amino-acid time courses, measured in blood after a protein meal. From these Wood curves parameters of interest like AUC can be derived, and used in a mixed model to compare amino-acid uptake from different protein sources.
+Version: 0.9.7
+Author: Ron Wehrens and Jasper Engel
+Maintainer: Ron Wehrens <ron.wehrens@gmail.com>
+Depends: R (>= 3.5.0)
+Imports: grDevices, lme4, nls.multstart, pracma, reshape2, lattice, latticeExtra, grid, gridExtra, emmeans, multcomp, R.utils, MASS
+License: GPL (>= 2)
