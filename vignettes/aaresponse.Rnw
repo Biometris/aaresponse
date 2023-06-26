@@ -1,5 +1,5 @@
 \documentclass[a4paper]{article}
-%\VignetteEngine{knitr::knitr_notangle}
+%\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{alsace}
 
 \usepackage{hyperref}
@@ -118,8 +118,8 @@ showDataFits(testdata, allWoodCurves)
 Parameters of interest then can be calculated and visualized easily:
 
 <<showCode3,eval=FALSE>>=
-allParams.uncur <- extractParameters(allWoodCurves)
-allParams <- curateParameters(allParams.uncur)
+allParams.uncurated <- extractParameters(allWoodCurves)
+allParams <- curateParameters(allParams.uncurated)
 ## Values for individual participants:
 showParameters(allParams)
 ## Aggregated values:
@@ -202,7 +202,7 @@ totals are of interest, they can be defined before calling
 argument. Here, we add the combination of leucine, isoleucine and
 valine under the name \code{BCAA}:
 
-<<addTotal,echo=TRUE,cache=TRUE>>=
+<<addTotal,echo=TRUE>>=
 supro$BCAA <- supro$Leu + supro$Ile + supro$Val
 supro <- checkAAdata(supro, quiet = TRUE,
                      totalnames = c("TAA", "TEAA", "BCAA"))
@@ -223,7 +223,7 @@ figure is shown as well).
 
 \begin{figure}[h]
 \centering
-<<raw1,echo=TRUE,cache=TRUE,fig.height=4,fig.width=10,out.width='\\textwidth'>>=
+<<raw1,echo=TRUE,fig.height=4,fig.width=10,out.width='\\textwidth'>>=
 showRawData(supro, type = "aa",
             subset = Participant %in% 1:3 & AA %in% c("His", "Leu", "Ser"))
 @
@@ -235,7 +235,7 @@ showRawData(supro, type = "aa",
 
 \begin{figure}[tb]
 \centering
-<<raw2,echo=TRUE,cache=TRUE,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
+<<raw2,echo=TRUE,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
 showRawData(supro, type = "participant",
             subset = Participant %in% 1:3 & AA %in% c("His", "Leu", "Ser"))
 @
@@ -247,7 +247,7 @@ showRawData(supro, type = "participant",
 
 \begin{figure}[tb]
 \centering
-<<raw3,echo=TRUE,cache=TRUE,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
+<<raw3,echo=TRUE,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
 showRawData(supro, type = "sequential",
             subset = Participant %in% 1:3 & AA %in% c("His", "Leu", "Ser"))
 @
@@ -299,7 +299,7 @@ scaling: in the mean-centered data it is clear that the curves for
 
 \begin{figure}[tb]
 \centering
-<<pcaSc1,echo=FALSE,cache=TRUE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
+<<pcaSc1,echo=FALSE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
 PCApar1 <- doPCA(supro, type = "par")
 pl1 <- plotScores(PCApar1)
 PCApar2 <- doPCA(supro, type = "par", rcenter = TRUE, rscale = TRUE)
@@ -315,7 +315,7 @@ grid.arrange(pl1, pl2, ncol = 2)
 
 \begin{figure}[tb]
 \centering
-<<pcaL1,echo=FALSE,cache=TRUE,fig.height=8,fig.width=14,out.width='\\textwidth'>>=
+<<pcaL1,echo=FALSE,fig.height=8,fig.width=14,out.width='\\textwidth'>>=
 pl1 <- plotLoadings(PCApar1)
 pl2 <- plotLoadings(PCApar2)
 grid.arrange(pl1, pl2, ncol = 2)
@@ -354,7 +354,7 @@ each component is a set of 19 time series, one for each amino acid.
 
 \begin{figure}[tb]
 \centering
-<<pcaSc2,echo=FALSE,cache=TRUE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
+<<pcaSc2,echo=FALSE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
 PCApro <- doPCA(supro, type = "pro")
 pl1 <- plotScores(PCApro, highlight = "Participant")
 pl2 <- plotScores(PCApro, highlight = "Intervention", nrowLegend = 3)
@@ -368,7 +368,7 @@ grid.arrange(pl1, pl2, ncol = 2)
 
 \begin{figure}[tb]
 \centering
-<<pcaL2,echo=FALSE,cache=TRUE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<pcaL2,echo=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
 plotLoadings(PCApro)
 @
 \caption{Loading plot for the \code{"pro"} PCA plot -- 
@@ -391,7 +391,7 @@ differences between the protein meals: \code{WP} clearly stands out.
 
 \begin{figure}[tb]
 \centering
-<<pcaSc3,echo=FALSE,cache=TRUE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
+<<pcaSc3,echo=FALSE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
 PCAaa <- doPCA(supro, type = "aa")
 pl1 <- plotScores(PCAaa, highlight = "AA")
 pl2 <- plotScores(PCAaa, highlight = "Participant", nrowLegend = 4)
@@ -406,7 +406,7 @@ grid.arrange(pl1, pl2, ncol = 2)
 
 \begin{figure}[tb]
 \centering
-<<pcaL3,echo=FALSE,cache=TRUE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<pcaL3,echo=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
 plotLoadings(PCAaa)
 @
 \caption{Loading plot for the \code{"aa"} PCA plot -- columns are
@@ -424,7 +424,7 @@ shape.
 
 \begin{figure}[tb]
 \centering
-<<pcaSc4,echo=FALSE,cache=TRUE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
+<<pcaSc4,echo=FALSE,fig.height=5,fig.width=10,out.width='\\textwidth'>>=
 PCAboth <- doPCA(supro, type = "both")
 pl1 <- plotScores(PCAboth, highlight = "Intervention", nrowLegend = 3)
 pl2 <- plotScores(PCAboth, highlight = "Participant")
@@ -438,7 +438,7 @@ grid.arrange(pl1, pl2, ncol = 2)
 
 \begin{figure}[tb]
 \centering
-<<pcaL4,echo=FALSE,cache=TRUE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<pcaL4,echo=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
 plotLoadings(PCAboth)
 @
 \caption{Loading plot for the \code{"both"} PCA plot -- columns are
@@ -485,31 +485,79 @@ the RMS value of the fit.
 Function \code{fitWood} is useful to assess individual cases, but will
 rarely be used directly -- in
 principle one will want to fit all curves in a data set. This can
-be done as follows (for the sake of the example we'll only fit the
-amino-acid totals curves for Participants 1 and 2 and a subset of
-amino acids):
+be done as follows:
 
-<<fitWood,eval=FALSE>>=
-idx <- supro$Participant == 1 | supro$Participant == 2
-resultP12 <- fitWoodAll(supro[idx, 1:8])
-@ 
-
-<<fitWoodP12, echo=FALSE,cache=TRUE>>=
-<<fitWood>>
+<<fitAllParams,eval=FALSE>>=
+resultPall.uncurated <- fitWoodAll(supro, what = "totals")
 @
 
 \noindent
-The result is a simple data frame (output limited here to two decimal places):
+Here we only fit the three aggregations of amino acids, using the
+\code{what} argument. Other choices are to fit single amino acids
+(value \code{``aas''}), or essential 
+amino acids (\code{``essentials''}). The default is to fit
+curves through all suitable columns detected (\code{``all''}).
+The result is a simple data frame (output limited here to two decimal
+places):
 
 <<fitWoodShow>>=
-format(resultP12[1:6,], digits = 2, nsmall = 2)
+format(resultPall.uncurated[1:6,], digits = 2, nsmall = 2)
 @
 
 \noindent
-Note that argument \code{what} is available limiting the curve
-fitting to either single amino acids, or amino-acid totals (not present
-in the example data set). The default is to fit curves through all
-suitable columns detected.
+
+It is good practice to visually check all curve fits -- if
+strange results are found the fit can be performed manually, perhaps
+starting from different initial values or using a different optimizer.
+Alternatively, the case could be considered lost, and the
+corresponding parameters can be replaced by missing values.
+One possible visualization is provided by
+\code{showDataFits}, that also takes the subset
+argument -- see Figure~\ref{fig:showDataFits}. Such
+plots are particularly useful when zooming in on a few suspect 
+results. An overview of the fitted curves without the data points can
+be illuminating, too, especially when curves are shown without a
+baseline, as is shown in Figure~\ref{fig:showDataFits2}.
+
+\begin{figure}[tb]
+\centering
+<<showDataFits,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
+showDataFits(supro, resultPall.uncurated,
+             subset = Participant %in% c("1", "2"))
+@
+\caption{Wood curves for two subjects, including the measured points.}
+\label{fig:showDataFits}
+\end{figure}
+
+
+\begin{figure}[tb]
+\centering
+<<showDataFits2,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
+showDataFits(supro, resultPall,
+             subset = Participant %in% c("1", "2") &
+               AA %in% c("His", "Asn"),
+             baseLineCorr = TRUE, points = FALSE)
+@
+\caption{Wood curves for all available AA traces of two subjects,
+  without experimental data, and with extimated baselines subtracted.}
+\label{fig:showDataFits2}
+\end{figure}
+
+The fitted parameters themselves can be visualized through function
+\code{showParameters}, providing a simple dotplot containing all
+estimated values. Figure~\ref{fig:cFits} shows an example.
+
+\begin{figure}[tb]
+\centering
+<<cFits,fig.height=4.5,fig.width=10,out.width='\\textwidth'>>=
+showParameters(resultPall.uncurated)
+@
+\caption{Fitted curve parameters. Clearly one can see that peaks from Corn
+  come later than from \code{BP}, whereas \code{WP} gives the fastest
+  response: curve parameter $m$ corresponds to the time to the peak
+  maximum.} 
+\label{fig:cFits}
+\end{figure}
 
 Since these fits are generated automatically using quite generous
 boundaries, it is possible to obtain results that are not very
@@ -530,83 +578,28 @@ shown by calling the function, \code{curateFits}, without parameters:
 
 <<curateFits>>=
 curateFits()
-resultP12.cur <- curateFits(resultP12)
+tmp <- curateFits(resultPall.uncurated)
 @ 
 
 \noindent
-If other values than the defaults need to be used it can simply be
-done by providing boundaries for the parameters \code{a}, \code{m},
-\code{c} and/or \code{d}:
+Note that function \code{curateFits} returns a message mentioning how
+many records have been curated (if any). The defaults have been tuned to the
+levels of individual AAs -- for AA totals, as in the current case,
+other values are more appropriate. These can simply be provided to the
+\code{curateFits} function as boundaries for the parameters \code{a},
+\code{m}, \code{c} and/or \code{d}:
 
-<<curateFitsSpecific,eval=FALSE>>=
-resultP12.cur2 <- curateFits(resultP12, a = c(0, 500), m = c(0, 50))
+<<curateFitsSpecific>>=
+resultPall <- curateFits(resultPall.uncurated, a = c(0, 4000), d = c(0, 5000))
 @ 
 
 \noindent
-Function \code{curateFits} returns a message mentioning how many
-records have been curated; in the above two examples no outlying cases
-were found.
-
-It is good practice to visually check all curve fits -- if
-strange results are found the fit can be performed manually, perhaps
-starting from different initial values or using a different optimizer.
-Alternatively, the case could be considered lost, and the
-corresponding parameters can be replaced by missing values.
-One possible visualization is provided by
-\code{showDataFits}, that also takes the subset
-argument -- see Figure~\ref{fig:showDataFits}. Such
-plots are particularly useful when zooming in on a few suspect 
-results. An overview of the fitted curves without the data points can
-be illuminating, too, especially when curves are shown without a
-baseline. An example depicting a larger number of amino acids is shown
-in Figure~\ref{fig:showDataFits2}.
-
-\begin{figure}[tb]
-\centering
-<<showDataFits,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
-showDataFits(supro[idx, 1:8], resultP12.cur,
-             subset = AA %in% c("His", "Asn"))
-@
-\caption{Wood curves for two subjects and two AAs, including the
-  measured points.}
-\label{fig:showDataFits}
-\end{figure}
-
-\begin{figure}[tb]
-\centering
-<<showDataFits2,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
-showDataFits(supro[idx, 1:8], resultP12.cur,
-             baseLineCorr = TRUE, points = FALSE)
-@
-\caption{Wood curves for all available AA traces of two subjects,
-  without experimental data, and with extimated baselines subtracted.}
-\label{fig:showDataFits2}
-\end{figure}
-
-<<fitAllParamsReally,echo=FALSE,message=FALSE,cache=TRUE>>=
-resultPall.uncurated <- fitWoodAll(supro, what = "aas")
-resultPall <- curateFits(resultPall.uncurated)
-allParams.uncurated <- extractParameters(resultPall)
-allParams <- curateParameters(allParams.uncurated)
-@
-
-The fitted parameters themselves can be visualized through function
-\code{showParameters}, providing a simple dotplot containing all
-estimated values. Figure~\ref{fig:cFits} shows an example, this time
-using \code{resultPall}, an \R\ object containing the fits for all
-individual amino acids and all participants.
-
-\begin{figure}[tb]
-\centering
-<<cFits,fig.height=4.5,fig.width=10,out.width='\\textwidth'>>=
-showParameters(resultPall, subset = AA %in% c("His", "Asn"))
-@
-\caption{Fitted curve parameters for all \code{His} and \code{Asn}
-  data. Clearly one can see that peaks from Corn come later than from
-  \code{BP}, whereas \code{WP} gives the fastest response: curve parameter $m$
-  corresponds to the time to the peak maximum.}
-\label{fig:cFits}
-\end{figure}
+With these settings, no records are curated, which is in agreement
+with Figure~\ref{fig:showDataFits}, where no really big outliers are
+visible. At this point it is important not to be too strict -- at the
+final stage, the PoIs, another round of curation is advised, and there
+the parameters are more easily interpretable, leading to potentially
+stricter checks.
 
 \clearpage
 \section{Extracting parameters of interest}
@@ -623,9 +616,9 @@ computed. The peak height (relative to baseline $d$) is given by
 $max(y) - d = a(b/c)^{b}e^{-b}$. Three extraction functions are available:
 
 <<extractParameters>>=
-getAUC(resultP12.cur[1,], maxT = 180)
-getHeight(resultP12.cur[1,])
-getTime2Max(resultP12.cur[1,], minutes = TRUE)
+getAUC(resultPall[1,], maxT = 180)
+getHeight(resultPall[1,])
+getTime2Max(resultPall[1,], minutes = TRUE)
 @ 
 
 \noindent
@@ -636,9 +629,9 @@ too. For convenience, a wrapper function,
 \code{extractParameters}, is available to collect all relevant
 information in a single data frame:
 
-<<extractParametersWrapper>>=
-paramsP12 <- extractParameters(resultP12.cur, maxT = 180)
-format(paramsP12[1:15,], digits = 2, nsmall = 2)
+<<extractParametersWrapper,warning=FALSE>>=
+allParams.uncurated <- extractParameters(resultPall, maxT = 180)
+format(allParams.uncurated[1:15,], digits = 2, nsmall = 2)
 @
 
 \noindent
@@ -650,7 +643,7 @@ again be used. These plots can help in the curation of the data, for which
 
 <<curatePeaks>>=
 curateParameters()
-paramsP12.curated <- curateParameters(paramsP12)
+allParams <- curateParameters(allParams.uncurated, Height = c(0, Inf))
 @ 
 
 \noindent
@@ -677,7 +670,7 @@ showPoIs(AUC = summarizePoIs(allParams, "AUC"),
 
 \begin{figure}[tb]
 \centering
-<<pois,echo=FALSE,cache=TRUE,fig.height=2.5,fig.width=6,out.width='.6\\textwidth'>>=
+<<pois,echo=FALSE,fig.height=2.5,fig.width=6,out.width='.6\\textwidth'>>=
 <<showPoIs>>
 @
 \caption{PoI estimates, including 95\% confidence intervals, for two
@@ -733,7 +726,7 @@ parameter values, obtained from the fits and curated in the same way
 as above. One difference is that we now use the default AUC cutoff of
 300 minutes. Applying \code{compareInterventions} again is easy:
 
-<<compareInterventions,cache=TRUE,message=FALSE,warning = FALSE>>=
+<<compareInterventions,message=FALSE,warning = FALSE>>=
 finalResult <- compareInterventions(allParams, target = "AUC",
                                     logTransform = TRUE)
 @ 
@@ -756,7 +749,7 @@ or 0 in case of differences).
 
 \begin{figure}[tb]
 \centering
-<<CIs,echo=TRUE,cache=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<CIs,echo=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
 showCIs(finalResult)
 @
 \caption{Visualization of the protein comparisons for the ratios of AUC
@@ -766,7 +759,7 @@ showCIs(finalResult)
 
 \begin{figure}[tb]
 \centering
-<<CIs1,echo=TRUE,cache=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<CIs1,echo=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
 finalResult1 <- compareInterventions(allParams, target = "AUC")
 showCIs(finalResult1)
 @
@@ -777,7 +770,7 @@ showCIs(finalResult1)
 
 \begin{figure}[tb]
 \centering
-<<CIs2,echo=TRUE,cache=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<CIs2,echo=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
 finalResult2 <- compareInterventions(allParams, target = "Height")
 showCIs(finalResult2)
 @
@@ -788,7 +781,7 @@ showCIs(finalResult2)
 
 \begin{figure}[tb]
 \centering
-<<CIs3,echo=TRUE,cache=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<CIs3,echo=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
 finalResult3 <- compareInterventions(allParams, target = "Time2Max")
 showCIs(finalResult3)
 @
@@ -849,7 +842,7 @@ between the difference of the .2 and .8 quintiles and peak height,
 which means we can use that to impute the \code{NA} values. For AUC
 the correlation is less good, but still usable. This works as follows:
 
-<<imputeVals,echo=TRUE,cache=TRUE>>=
+<<imputeVals,echo=TRUE>>=
 fullPoIs <- imputePoIs(supro, allParams, quant = .2)
 head(fullPoIs)
 @ 
@@ -864,7 +857,7 @@ small in almost all cases, as they should be.
 
 \begin{figure}[tb]
 \centering
-<<imputedValues,echo=FALSE,cache=TRUE,fig.height=10,fig.width=10,out.width='\\textwidth'>>=
+<<imputedValues,echo=FALSE,fig.height=10,fig.width=10,out.width='\\textwidth'>>=
 pl1 <- xyplot(AUC.i ~ AUC.orig, data = fullPoIs,
               ylab = "Imputed AUC values",
               xlab = "AUC values from curve fitting")
@@ -884,7 +877,7 @@ grid.arrange(pl1, pl2, pl3, pl4, ncol = 2)
 \label{fig:imputedValues}
 \end{figure}
 
-<<getImputedCIs, echo=FALSE,cache=TRUE, message=FALSE, warning=FALSE>>=
+<<getImputedCIs, echo=FALSE, message=FALSE, warning=FALSE>>=
 finalResulta <- compareInterventions(fullPoIs, target = "AUC",
                                      logTransform = TRUE)
 finalResult2a <- compareInterventions(fullPoIs, target = "Height")
