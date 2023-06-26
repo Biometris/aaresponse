@@ -487,7 +487,7 @@ rarely be used directly -- in
 principle one will want to fit all curves in a data set. This can
 be done as follows:
 
-<<fitAllParams,eval=FALSE>>=
+<<fitAllParams>>=
 resultPall.uncurated <- fitWoodAll(supro, what = "totals")
 @
 
@@ -525,20 +525,19 @@ baseline, as is shown in Figure~\ref{fig:showDataFits2}.
 showDataFits(supro, resultPall.uncurated,
              subset = Participant %in% c("1", "2"))
 @
-\caption{Wood curves for two subjects, including the measured points.}
+\caption{Wood curves for AA totals of two subjects, including the
+  measured points.} 
 \label{fig:showDataFits}
 \end{figure}
-
 
 \begin{figure}[tb]
 \centering
 <<showDataFits2,fig.height=6,fig.width=10,out.width='.8\\textwidth'>>=
-showDataFits(supro, resultPall,
-             subset = Participant %in% c("1", "2") &
-               AA %in% c("His", "Asn"),
+showDataFits(supro, resultPall.uncurated,
+             subset = Participant %in% c("1", "2"),
              baseLineCorr = TRUE, points = FALSE)
 @
-\caption{Wood curves for all available AA traces of two subjects,
+\caption{Wood curves for AA totals of two subjects,
   without experimental data, and with extimated baselines subtracted.}
 \label{fig:showDataFits2}
 \end{figure}
@@ -552,7 +551,8 @@ estimated values. Figure~\ref{fig:cFits} shows an example.
 <<cFits,fig.height=4.5,fig.width=10,out.width='\\textwidth'>>=
 showParameters(resultPall.uncurated)
 @
-\caption{Fitted curve parameters. Clearly one can see that peaks from Corn
+\caption{Fitted curve parameters. Two large outliers are present in
+  the $a$ and $c$ panels. In addition, one can see that peaks from Corn 
   come later than from \code{BP}, whereas \code{WP} gives the fastest
   response: curve parameter $m$ corresponds to the time to the peak
   maximum.} 
@@ -594,9 +594,10 @@ resultPall <- curateFits(resultPall.uncurated, a = c(0, 4000), d = c(0, 5000))
 @ 
 
 \noindent
-With these settings, no records are curated, which is in agreement
-with Figure~\ref{fig:showDataFits}, where no really big outliers are
-visible. At this point it is important not to be too strict -- at the
+With these settings, two records are curated, which is in agreement
+with Figure~\ref{fig:cFits}, where the two outliers are
+visible in the \code{``a''} panel. At this point it is important not
+to be too strict -- at the 
 final stage, the PoIs, another round of curation is advised, and there
 the parameters are more easily interpretable, leading to potentially
 stricter checks.
@@ -663,8 +664,7 @@ the associated confidence intervals. The plot (here again focusing on
 <<showPoIs,eval=FALSE>>=
 showPoIs(AUC = summarizePoIs(allParams, "AUC"),
          Height = summarizePoIs(allParams, "Height"),
-         Time2Max = summarizePoIs(allParams, "Time2Max"),
-         subset = AA %in% c("Asn", "His"))
+         Time2Max = summarizePoIs(allParams, "Time2Max"))
 @
 
 
@@ -749,7 +749,7 @@ or 0 in case of differences).
 
 \begin{figure}[tb]
 \centering
-<<CIs,echo=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<CIs,echo=TRUE,message=FALSE,fig.height=3,fig.width=8,out.width='.8\\textwidth'>>=
 showCIs(finalResult)
 @
 \caption{Visualization of the protein comparisons for the ratios of AUC
@@ -759,7 +759,7 @@ showCIs(finalResult)
 
 \begin{figure}[tb]
 \centering
-<<CIs1,echo=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<CIs1,echo=TRUE,message=FALSE,fig.height=3,fig.width=8,out.width='.8\\textwidth'>>=
 finalResult1 <- compareInterventions(allParams, target = "AUC")
 showCIs(finalResult1)
 @
@@ -770,7 +770,7 @@ showCIs(finalResult1)
 
 \begin{figure}[tb]
 \centering
-<<CIs2,echo=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<CIs2,echo=TRUE,message=FALSE,fig.height=3,fig.width=8,out.width='.8\\textwidth'>>=
 finalResult2 <- compareInterventions(allParams, target = "Height")
 showCIs(finalResult2)
 @
@@ -781,7 +781,7 @@ showCIs(finalResult2)
 
 \begin{figure}[tb]
 \centering
-<<CIs3,echo=TRUE,message=FALSE,fig.height=5,fig.width=8,out.width='.8\\textwidth'>>=
+<<CIs3,echo=TRUE,message=FALSE,fig.height=3,fig.width=8,out.width='.8\\textwidth'>>=
 finalResult3 <- compareInterventions(allParams, target = "Time2Max")
 showCIs(finalResult3)
 @
