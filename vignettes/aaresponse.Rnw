@@ -58,7 +58,7 @@ require(gridExtra,quiet = TRUE)
 \maketitle
 
 \section{Introduction}
-In the global search for a more sustainable way of feeding the human
+In the search for a more sustainable way of feeding the human
 population proteins attract special attention. They are indispensible
 since they provide amino acids, several of which cannot be synthesized
 within the human body (the ``essential amino acids''). Currently we
@@ -494,9 +494,9 @@ resultPall.uncurated <- fitWoodAll(supro, what = "totals")
 \noindent
 Here we only fit the three aggregations of amino acids, using the
 \code{what} argument. Other choices are to fit single amino acids
-(value \code{``aas''}), or essential 
-amino acids (\code{``essentials''}). The default is to fit
-curves through all suitable columns detected (\code{``all''}).
+(value \code{"aas"}), or essential 
+amino acids (\code{"essentials"}). The default is to fit
+curves through all suitable columns (\code{"all"}).
 The result is a simple data frame (output limited here to two decimal
 places):
 
@@ -542,9 +542,6 @@ showDataFits(supro, resultPall.uncurated,
 \label{fig:showDataFits2}
 \end{figure}
 
-The fitted parameters themselves can be visualized through function
-\code{showParameters}, providing a simple dotplot containing all
-estimated values. Figure~\ref{fig:cFits} shows an example.
 
 \begin{figure}[tb]
 \centering
@@ -559,6 +556,9 @@ showParameters(resultPall.uncurated)
 \label{fig:cFits}
 \end{figure}
 
+The fitted parameters themselves can be visualized through function
+\code{showParameters}, providing a simple dotplot containing all
+estimated values. Figure~\ref{fig:cFits} shows an example.
 Since these fits are generated automatically using quite generous
 boundaries, it is possible to obtain results that are not very
 realistic. This can happen when the data do not contain much signal,
@@ -596,8 +596,8 @@ resultPall <- curateFits(resultPall.uncurated, a = c(0, 4000), d = c(0, 5000))
 \noindent
 With these settings, two records are curated, which is in agreement
 with Figure~\ref{fig:cFits}, where the two outliers are
-visible in the \code{``a''} panel. At this point it is important not
-to be too strict -- at the 
+visible in the \code{a} panel (and in the \code{c} panel, too). At
+this point it is important not to be too strict -- at the 
 final stage, the PoIs, another round of curation is advised, and there
 the parameters are more easily interpretable, leading to potentially
 stricter checks.
@@ -670,7 +670,7 @@ showPoIs(AUC = summarizePoIs(allParams, "AUC"),
 
 \begin{figure}[tb]
 \centering
-<<pois,echo=FALSE,fig.height=2.5,fig.width=6,out.width='.6\\textwidth'>>=
+<<pois,echo=FALSE,fig.height=4,fig.width=6,out.width='.6\\textwidth'>>=
 <<showPoIs>>
 @
 \caption{PoI estimates, including 95\% confidence intervals, for two
@@ -745,7 +745,8 @@ in figure format is provided by function \code{showCIs}, as shown in
 Figure~\ref{fig:CIs}. Confidence intervals for the other PoIs are
 shown in Figures~\ref{fig:CIs1}-\ref{fig:CIs3}. CIs in red indicate
 significant deviations from baseline (either 1, if we look at ratios,
-or 0 in case of differences).
+or 0 in case of differences); CIs in black indicate deviations in
+which the baseline level is included within the interval.
 
 \begin{figure}[tb]
 \centering
@@ -802,7 +803,7 @@ Figure~\ref{fig:combinedCIs}. Also here it is possible to provide a
 
 \begin{figure}[tb]
 \centering
-<<combinedCIs,fig.height=8,fig.width=10,out.width='\\textwidth'>>=
+<<combinedCIs,fig.height=4,fig.width=10,out.width='\\textwidth'>>=
 showCombinedCIs(lAUC = finalResult, Height = finalResult2,
                 Time2Max = finalResult3)
 @
@@ -871,9 +872,12 @@ pl4 <- bwplot(~ Height.i, data = fullPoIs, subset = is.na(Height.orig),
 grid.arrange(pl1, pl2, pl3, pl4, ncol = 2)
 @
 \caption{Top row: fitted against imputed values for \code{AUC} and
-  \code{Height} -- these imputed values are not used since the values
-  based on the curve fits are available.
-  Bottom row: distribution of imputed values corresponding to missing PoIs.}
+  \code{Height} -- note that these imputed values are not used since the values
+  based on the curve fits are available, but the plots show that the
+  agreement between imputed and actual values is pretty reasonable.
+  Bottom row: distribution of imputed values corresponding to missing
+  PoIs. It is clear that imputed values occur only at the lower end of
+  the scales.}
 \label{fig:imputedValues}
 \end{figure}
 
@@ -891,7 +895,7 @@ cases more differences will be visible.
 
 \begin{figure}[tb]
 \centering
-<<allCIs,fig.height=8,fig.width=7,out.width='.7\\textwidth'>>=
+<<allCIs,fig.height=4,fig.width=7,out.width='.7\\textwidth'>>=
 showCombinedCIs(lAUC = finalResulta, Height = finalResult2a)
 @
 \caption{All confidence intervals based on imputed AUC and Height
