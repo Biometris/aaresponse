@@ -64,7 +64,7 @@ testPeriodEffect <- function(fitModels) {
   pvalsPeriod
 }  
 
-doComparisons <- function(fitModels, logTransform = FALSE) {
+doComparisons <- function(fitModels, logTransform = FALSE, ...) {
   doEMmeans <- function(mFit, logT) {
     if (logT) {
       regrid(emmeans(mFit, "Intervention"), transform = "log")
@@ -86,7 +86,7 @@ doComparisons <- function(fitModels, logTransform = FALSE) {
     result
   }
   
-  allConfInts <- lapply(results, myconfint)
+  allConfInts <- lapply(results, myconfint, ...)
   allConfInts <- allConfInts[!sapply(allConfInts, function(x) all(is.na(x)))]
   result.df <- as.data.frame(do.call(rbind, allConfInts))
   names(result.df)[2] <- "Estimate"
@@ -111,7 +111,7 @@ compareInterventions <-
            model.formula = "~ Period + Intervention + (1 | Participant)",
            lm.alternative = "~ Period + Intervention",
            mainFun = lmer, singularFun = lm,
-           respondersOnly = TRUE)
+           respondersOnly = TRUE, ...)
 {
   model.terms <- trimws(strsplit(model.formula, "\\+")[[1]])
 
@@ -129,5 +129,5 @@ compareInterventions <-
   if ("Period" %in% model.terms)
     periodPvals <- testPeriodEffect(fitModels)
   
-  doComparisons(fitModels, logTransform)
+  doComparisons(fitModels, logTransform, ...)
 }

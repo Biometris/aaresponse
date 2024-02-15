@@ -20,6 +20,5 @@ trapRule(y, x = 1:length(y), maxT = max(x))
 \examples{
 data(supro)
 trapRule(supro$Thr[1:10], supro$Time[1:10])
-trapRule(supro$Thr[1:10], supro$Time[1:10])
 }
 \keyword{manip}
