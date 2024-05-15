@@ -1,11 +1,14 @@
 ## Various possibilities for visualizing the raw data. Variable datf
 ## should be the raw data object.
-showRawData <- function(datf,
-                        type = c("aa", "participant", "sequential"),
-                        relevantAAs, 
-                        what = c("all", "aas", "essentials", "totals"),
-                        scale = list(y = "free"),
-                        ...) {
+showRawData <-
+  function(datf,
+           type = c("aa", "participant", "sequential"),
+           relevantAAs, 
+           what = c("all", "aas", "essentials", "totals"),
+           scale = list(y = "free"),
+           xlab = "Time (mins)",
+           ylab = expression(paste("AA level (", mu, "M)", sep = "")),
+           ...) {
   type <- match.arg(type)
   what <- match.arg(what)
 
@@ -42,7 +45,7 @@ showRawData <- function(datf,
     aa = {
       xyplot(value ~ Time | AA, data = datf.df3, groups = Intervention,
              auto.key = list(points = FALSE, lines = TRUE, columns = nProt),
-             xlab = "Time (mins)", ylab = "AA level", ...,
+             xlab = xlab, ylab = ylab, ...,
              as.table = TRUE, type = "l", scale = scale)
     },
     participant =
@@ -50,7 +53,7 @@ showRawData <- function(datf,
         combineLimits(
           xyplot(value ~ Time | Participant + AA, data = datf.df3,
                  groups = Intervention, as.table = TRUE, ...,
-                 xlab = "Time (mins)", ylab = "AA level",
+                 xlab = xlab, ylab = ylab,
                  auto.key = list(points = FALSE, lines = TRUE,
                                  columns = nProt),
                  type = "l", scale = scale)
@@ -61,17 +64,15 @@ showRawData <- function(datf,
           xyplot(value ~ Time | Participant + AA, groups = Intervention,
                  auto.key = list(points = FALSE, lines = TRUE, columns = nProt),
                  data = datf.df3, type = "l", as.table = TRUE,
-                 xlab = "Time (mins)", ylab = "AA level",
+                 xlab = xlab, ylab = ylab,
                  scale = scale, ...,
                  prepanel = function(...) {
                    list(xlim = c(0, nProt * maxTime))
                  },
                  panel = function(x, y, ..., groups, subscripts) {
-                   ##                   x[is.na(y)] <- NA
                    x2 <- x +
                      (as.integer(datf.df3$Period[subscripts]) - 1) *
                      maxTime
-                   ## browser()
                    panel.xyplot(x2, y, groups = groups,
                                 subscripts = subscripts, ...)
                  })
@@ -85,11 +86,13 @@ showRawData <- function(datf,
 ## Need to insert a check that the relevant what stuff is also present
 ## in pardf, probably more important than comparing to datf
 ## Add check if relvars is empty
-showDataFits <- function(datf, pardf, relevantAAs,
-                         what = c("all", "aas", "essentials", "totals"),
-                         xlab = "Time (min.)", ylab = "AA level",
-                         scale = list(y = "free"), baseLineCorr = FALSE,
-                         points = TRUE, noLegend = FALSE, ...) {
+showDataFits <-
+  function(datf, pardf, relevantAAs,
+           what = c("all", "aas", "essentials", "totals"),
+           xlab = "Time (mins)",
+           ylab = expression(paste("AA level (", mu, "M)", sep = "")),
+           scale = list(y = "free"), baseLineCorr = FALSE,
+           points = TRUE, noLegend = FALSE, ...) {
   what <- match.arg(what)
 
   Intervention <- NULL # to avoid R CMD check NOTEs
@@ -188,7 +191,7 @@ showParameters <- function(params,
   params.df <- melt(params[params$AA %in% relevantAAs,],
                     id.vars = c("Participant", "AA", "Intervention", "Period"))
   params.df$AA <- factor(params.df$AA)
-  
+
   useOuterStrips(
     combineLimits(
       xyplot(Participant ~ value | variable + AA, groups = Intervention,
