@@ -11,7 +11,7 @@ compareInterventions(
   logTransform = FALSE,
   model.formula = "~ Period + Intervention + (1 | Participant)",
   lm.alternative = "~ Period + Intervention",
-  mainFun = lmer, singularFun = lm, respondersOnly = TRUE, ...)
+  mainFun = lme4:::lmer, singularFun = lm, respondersOnly = TRUE, ...)
 }
 \arguments{
   \item{dt}{A data frame with at least the columns in the \code{target},
@@ -31,7 +31,7 @@ compareInterventions(
     Height are ignored. If no imputed values for these parameters are
     present, respondersOnly will be set to TRUE, whatever the actual
     value of the argument (with a warning).}
-  \item{dots}{Additional arguments to \code{confint}, in particular
+  \item{\dots}{Additional arguments to \code{confint}, in particular
     useful for things like \code{adjust = "none"}.}
 }
 \value{A data frame containing estimated differences (or ratios, in the

@@ -10,7 +10,7 @@
 \usage{
 fitMixedModels(dt, refIntervention,
                model.formula, lm.alternative,
-               mainFun = lmer, respondersOnly = TRUE)
+               mainFun = lme4:::lmer, respondersOnly = TRUE)
 }
 \arguments{
   \item{dt}{Data frame containing the relevant information.}
@@ -30,8 +30,12 @@ fitMixedModels(dt, refIntervention,
 }
 \examples{
 \dontrun{
-  data(pois)
-  modList <- fitMixedModels(pois, target = "AUC")
+data(pois)
+modList <-
+  fitMixedModels(
+    pois, refIntervention = "WP",
+    model.formula = "AUC ~ Period + Intervention + (1 | Participant)",
+    lm.alternative = "AUC ~ Period + Intervention")
 }
 }
 \keyword{manip}

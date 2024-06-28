@@ -72,6 +72,13 @@ curateParameters <- function(params,
     return(boundaryTable)
   }
 
+  if (any(levels(params$AA) %in% aminoacids()) &
+      any(levels(params$AA) %in% aatotals()))
+    warning("Curation will probably fail when applied to individual AAs and totals simulateously")
+
+  if (length(setdiff(levels(params$AA), c(aminoacids(), aatotals()))) > 0)
+    warning("Maybe relevant: curation will probably fail when applied to individual AAs and totals simulateously")
+  
   bad.idx <-
     is.na(params$Time2Max) | is.na(params$Height) | is.na(params$AUC) |
     params$Time2Max < Time2Max[1] | params$Time2Max > Time2Max[2] |

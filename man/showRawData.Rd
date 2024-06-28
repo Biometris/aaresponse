@@ -10,7 +10,9 @@ Shows raw data in a variety of ways, highlighting particular characteristics.
 showRawData(datf, type = c("aa", "participant", "sequential"),
             relevantAAs,
             what = c("all", "aas", "essentials", "totals"),
-            scale = list(y = "free"), ...)
+            scale = list(y = "free"),
+            xlab = "Time (mins)",
+            ylab = expression(paste("AA level (", mu, "M)", sep = "")), ...)
 }
 \arguments{
   \item{datf}{Data frame containing the required columns. These are
@@ -23,6 +25,7 @@ showRawData(datf, type = c("aa", "participant", "sequential"),
     argument.}
   \item{what}{selects individual amino acids, essential amino acids,
     amino acid totals, or all (default).}
+  \item{xlab, ylab}{Default values for axis labels.}
   \item{scale,\dots}{Additional arguments to the internal xyplot
     function.}
 }

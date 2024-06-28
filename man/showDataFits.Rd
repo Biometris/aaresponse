@@ -7,7 +7,8 @@
 \usage{
 showDataFits(datf, pardf, relevantAAs,
              what = c("all", "aas", "essentials", "totals"),
-             xlab = "Time (min.)", ylab = "AA level",
+             xlab = "Time (mins)",
+             ylab = expression(paste("AA level (", mu, "M)", sep = "")),
              scale = list(y = "free"), baseLineCorr = FALSE,
              points = TRUE, noLegend = FALSE, ...)
 }

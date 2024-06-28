@@ -28,6 +28,7 @@ showCombinedCIs(lAUC = NULL, AUC = NULL, Height = NULL, Time2Max = NULL,
   \item{between}{\code{xyplot} argument - default is to separate AUC
     results on a ratio scale from the other PoIs that are always on a
     difference scale.}
+  \item{subset}{Optional definition of a subset of amino acids.}
   \item{\dots}{Additional arguments to the underlying plot function,
     most often used to define a subset of the results to be displayed
     (see examples).}

@@ -113,7 +113,7 @@ showDataFits <-
   datf.df <- melt(datf[idx, c(idvars, relevantAAs)], variable.name = "AA",
                   id.vars = idvars)
   datf.df$AA <- factor(datf.df$AA)
-#  datf.df$Participant <- factor(datf.df$Participant)
+  datf.df$Participant <- factor(datf.df$Participant)
 
   mytype <- ifelse(points, "p", "n")
   parameters = c("a", "m", "c", "d")

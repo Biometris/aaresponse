@@ -1,0 +1,9 @@
+aaresponse version 1.0.0 is described in
+R. Wehrens, J. Engel, J. Mes, A. de Jong and D. Esser, Amino
+Acids (2024) 56:25; https://doi.org/10.1007/s00726-024-03386-6.  
+
+Changes in version 1.0.1:
+  - added a warning in curateParameters: when single-AA data and AA
+    totals are curated simultaneously, things may go wrong
+  - changed axis labels of several plots to include default units
+  - fixed bug in showDataFits, which created an error in the example

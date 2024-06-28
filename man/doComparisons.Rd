@@ -14,7 +14,7 @@ doComparisons(fitModels, logTransform, ...)
     be used.}
   \item{logTransform}{Boolean - whether or not to test ratios (logT =
     TRUE) or differences.}
-  \item{dots}{Additional arguments to \code{confint}, in particular
+  \item{\dots}{Additional arguments to \code{confint}, in particular
     useful for things like \code{adjust = "none"}.}
 }
 \value{The function returns a data.frame containing estimates and
@@ -27,7 +27,12 @@ employs the Dunnett multiple-testing adjustment.}
 }
 \examples{
 data(pois)
-modList <- fitMixedModels(pois, target = "AUC")
+modList <-
+  fitMixedModels(
+    pois,
+    refIntervention = "WP",
+    model.formula = "AUC ~ Period + Intervention + (1 | Participant)",
+    lm.alternative = "AUC ~ Period + Intervention")
 result <- doComparisons(modList)
 }
 \keyword{manip}

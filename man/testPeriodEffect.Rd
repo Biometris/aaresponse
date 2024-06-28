@@ -20,9 +20,16 @@ testPeriodEffect(fitModels)
 }
 \examples{
 \dontrun{
-  data(pois)
-  modList <- fitMixedModels(pois, target = "AUC")
-  pvals <- testPeriodEffect(modList)
+data(pois)
+modList <-
+  fitMixedModels(
+    pois,
+    refIntervention = "WP",
+    model.formula = "AUC ~ Period + Intervention + (1 | Participant)",
+    lm.alternative = "AUC ~ Period + Intervention",
+    mainFun = lmer,
+    respondersOnly = TRUE)
+pvals <- testPeriodEffect(modList)
 }
 }
 \keyword{manip}

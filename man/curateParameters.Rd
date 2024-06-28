@@ -8,7 +8,9 @@
   provided by the user. Invoking the function without arguments will
   lead to the defaults being printed. Note that the defaults are
   probably more appropriate for individual amino acids than for
-  amino-acid totals (see last example).
+  amino-acid totals (see last example) - if the function can determine
+  that both individual AAs and AA totals are processed simultaneously,
+  it will give a warning.
 }
 \usage{
 curateFits(fitparams, aa = c(0, 1000), mm = c(0, 100), cc = c(0, 100),

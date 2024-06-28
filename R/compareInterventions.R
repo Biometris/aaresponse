@@ -1,7 +1,7 @@
 fitMixedModels <-
   function(dt, refIntervention,
            model.formula, lm.alternative,
-           mainFun = lmer, respondersOnly = TRUE)
+           mainFun = lme4:::lmer, respondersOnly = TRUE)
 {
   imputedValues <- "AUC.orig" %in% colnames(dt)
 
@@ -110,7 +110,7 @@ compareInterventions <-
            logTransform = FALSE,
            model.formula = "~ Period + Intervention + (1 | Participant)",
            lm.alternative = "~ Period + Intervention",
-           mainFun = lmer, singularFun = lm,
+           mainFun = lme4:::lmer, singularFun = lm,
            respondersOnly = TRUE, ...)
 {
   model.terms <- trimws(strsplit(model.formula, "\\+")[[1]])
