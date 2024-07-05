@@ -585,7 +585,8 @@ tmp <- curateFits(resultPall.uncurated)
 Note that function \code{curateFits} returns a message mentioning how
 many records have been curated (if any). The defaults have been tuned to the
 levels of individual AAs -- for AA totals, as in the current case,
-other values are more appropriate. These can simply be provided to the
+other values are more appropriate.\footnote{If an attempt is made to
+  simultaneously curate single AAs and AA totals, a warning is given.} These can simply be provided to the
 \code{curateFits} function as boundaries for the parameters \code{a},
 \code{m}, \code{c} and/or \code{d}:
 
