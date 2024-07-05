@@ -2,6 +2,8 @@ aaresponse version 1.0.0 is described in
 R. Wehrens, J. Engel, J. Mes, A. de Jong and D. Esser, Amino
 Acids (2024) 56:25; https://doi.org/10.1007/s00726-024-03386-6.  
 
+Changes in version 1.0.2: (now develop branch)
+
 Changes in version 1.0.1:
   - extractParameters now returns an object of class 'aar' rather than
     just a data.frame
