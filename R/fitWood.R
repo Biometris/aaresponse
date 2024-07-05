@@ -70,8 +70,10 @@ fitWoodAll <- function(aadata, what = c("all", "aas", "essentials", "totals")) {
 
   
   finalresult <- cbind(result[,1:4], as.data.frame(result$x))
-  attr(finalresult, "aanames") <- attr(aadata, "aanames")
-  attr(finalresult, "totalnames") <- attr(aadata, "totalnames")
+  attr(finalresult, "aanames") <- intersect(attr(aadata, "aanames"),
+                                        levels(finalresult$AA))
+  attr(finalresult, "totalnames") <- intersect(attr(aadata, "totalnames"),
+                                           levels(finalresult$AA))
   attr(finalresult, "class") <- attr(aadata, "class")
 
   finalresult
@@ -90,6 +92,10 @@ curateFits <- function(fitparams,
            c("Min", "Max"))
     return(boundaryTable)
   }
+
+  if (length(attr(fitparams, "aanames")) > 0 &
+      length(attr(fitparams, "totalnames")) > 0)
+    warning("Applying the same curation boundaries to individual AAs and AA totals")
 
   bad.idx <-
     is.na(fitparams[,"a"]) | is.na(fitparams[,"m"]) |

@@ -27,11 +27,11 @@ fitWoodAll(aadata, what = c("all", "aas", "essentials", "totals"))
   estimates and the final RMS value. \code{fitWoodAll} is mainly a
   wrapper calculating the parameters for all combinations of
   Participant, Period, Intervention and AA (using \code{aggregate}). Its
-  result is a data frame where the list element \code{x} contains the
-  fitted parameters.
+  result is an object of class "aar".
 }
 \references{
-Wood Nature (1967)
+P.D.P. Wood, Algebraic model of the lactation curve in cattle. Nature
+216:164-165 (1967)
 }
 \author{
 Ron Wehrens

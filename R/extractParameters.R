@@ -44,19 +44,25 @@ extractParameters <- function(prs.df, maxT = 300, minutes = TRUE) {
     stop("Required information absent")
   ddff <- prs.df[required]
     
-  result <-
+  paramResult <-
     as.data.frame(
       cbind(apply(ddff, 1, getAUC, maxT = maxT),
             apply(ddff, 1, getHeight),
             apply(ddff, 1, getTime2Max, minutes = minutes)))
-  names(result) <- c("AUC", "Height", "Time2Max")
+  names(paramResult) <- c("AUC", "Height", "Time2Max")
 
   additional <- c("Participant", "Intervention", "AA", "Period")
   if (all(additional %in% names(prs.df))) {
-    cbind(prs.df[additional], as.data.frame(result))
+    result <- cbind(prs.df[additional], as.data.frame(paramResult))
   } else {
-    result
+    result <- paramResult
   }
+
+  attr(result, "aanames") <- attr(prs.df, "aanames")
+  attr(result, "totalnames") <- attr(prs.df, "totalnames")
+  attr(result, "class") <- attr(prs.df, "class")
+  
+  result
 }
 
 curateParameters <- function(params,
@@ -72,12 +78,9 @@ curateParameters <- function(params,
     return(boundaryTable)
   }
 
-  if (any(levels(params$AA) %in% aminoacids()) &
-      any(levels(params$AA) %in% aatotals()))
-    warning("Curation will probably fail when applied to individual AAs and totals simultaneously")
-
-  if (length(setdiff(levels(params$AA), c(aminoacids(), aatotals()))) > 0)
-    warning("Maybe relevant: curation will probably fail when applied to individual AAs and totals simulateously")
+  if (length(attr(params, "aanames")) > 0 &
+      length(attr(params, "totalnames")) > 0)
+    warning("Applying the same curation boundaries to individual AAs and AA totals")
   
   bad.idx <-
     is.na(params$Time2Max) | is.na(params$Height) | is.na(params$AUC) |

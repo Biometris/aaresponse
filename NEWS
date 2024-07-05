@@ -3,7 +3,12 @@ R. Wehrens, J. Engel, J. Mes, A. de Jong and D. Esser, Amino
 Acids (2024) 56:25; https://doi.org/10.1007/s00726-024-03386-6.  
 
 Changes in version 1.0.1:
+  - extractParameters now returns an object of class 'aar' rather than
+    just a data.frame
+  - subsetting using the "what" argument in function fitWoodAll now
+    leads to appropriate attributes for aanames and totalnames
   - added a warning in curateParameters: when single-AA data and AA
     totals are curated simultaneously, things may go wrong
   - changed axis labels of several plots to include default units
   - fixed bug in showDataFits, which created an error in the example
+  - completed reference (Wood 1967; Wehrens et al. 2024)

@@ -28,6 +28,9 @@ curateParameters(params, Time2Max = c(15, 200), Height = c(0, 1000),
 }
 \value{A data.frame is returned where the parameter values in all rows
   violating the boundary conditions are set to NA.}
+\details{If curation is attempted to both individual AAs and AA totals
+  simultaneously, a warning is issued - almost always these need
+  different curation limits.}
 \author{Ron Wehrens}
 \examples{
 data(pois)

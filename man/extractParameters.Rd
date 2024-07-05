@@ -30,10 +30,10 @@ extractParameters(prs.df, maxT = 300, minutes = TRUE)
     expressed in minutes. Default is TRUE.}
 }
 \value{The simple extraction functions return scalars, function
-  \code{extractParameters} returns a data frame.}
+  \code{extractParameters} returns an object of class 'aar'.}
 \author{Ron Wehrens}
 \seealso{
-\code{\link{extractParameters}}, \code{\link{showCIs}}
+\code{\link{checkAAdata}}, \link{extractParameters}}, \code{\link{showCIs}}
 }
 \examples{
 \dontrun{
