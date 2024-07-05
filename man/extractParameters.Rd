@@ -33,7 +33,7 @@ extractParameters(prs.df, maxT = 300, minutes = TRUE)
   \code{extractParameters} returns an object of class 'aar'.}
 \author{Ron Wehrens}
 \seealso{
-\code{\link{checkAAdata}}, \link{extractParameters}}, \code{\link{showCIs}}
+  \code{\link{checkAAdata}}, \code{\link{extractParameters}}, \code{\link{showCIs}}
 }
 \examples{
 \dontrun{
