@@ -82,7 +82,8 @@ plotLoadings <- function(PCAobj, ...) {
     x <- as.numeric(rownames(loadings.df))
     xyplot(PC1 + PC2 ~ x, data = loadings.df, type = "l",
            xlab = "Time (min.)", ylab = "Loadings",
-           auto.key = list(column = 2, points = FALSE, lines = TRUE),
+           auto.key = list(space = "top" columns = 2,
+                           points = FALSE, lines = TRUE),
            panel = function(...) {
              panel.abline(h = 0, v = 0, lty = 2, col = "gray")
              panel.xyplot(...)
@@ -102,7 +103,8 @@ plotLoadings <- function(PCAobj, ...) {
              xlab = "Time (min.)", ylab = "Loadings",
              groups = Label, layout = c(1,2), as.table = TRUE,
              scales = list(y = "free"),
-             auto.key = list(column = min(6, nlevels(loadings.df$Label))),
+             auto.key = list(space = "top",
+                             columns = min(6, nlevels(loadings.df$Label))),
              par.settings=list(superpose.symbol=list(pch=1:5)),
              panel = function(...) {
                panel.abline(h = 0, v = 0, lty = 2, col = "gray")
@@ -124,7 +126,8 @@ plotLoadings <- function(PCAobj, ...) {
                  xlab = "Time (min.)", ylab = "Loadings",
                  groups = Label, as.table = TRUE,
                  scales = list(y = "free"),
-                 auto.key = list(column = min(6, nlevels(loadings.df$Label))),
+                 auto.key = list(space = "top",
+                                 columns = min(6, nlevels(loadings.df$Label))),
                  par.settings=list(superpose.symbol=list(pch=1:5)),
                  panel = function(...) {
                    panel.abline(h = 0, v = 0, lty = 2, col = "gray")
@@ -217,7 +220,8 @@ plotScores <-
     }
     xyplot(PC2 ~ PC1, data = score.df, main = toptext, groups = Highlight,
            xlab = xlab, ylab = ylab,
-           auto.key = list(column = ncolLegend),
+           auto.key = list(space = "top",
+                           columns = ncolLegend),
            par.settings=list(superpose.symbol=list(pch=1:5)),
            panel = function(x, y, ...) {
              panel.abline(h = 0, v = 0, col = "gray", lty = 2)

@@ -121,7 +121,7 @@ showDataFits <-
   if (noLegend) {
     auto.k  <- FALSE
   } else {
-    auto.k  <- list(column = nlevels(datf.df$Intervention),
+    auto.k  <- list(columns = nlevels(datf.df$Intervention),
                     points = points, lines = !points)
   }
 
@@ -202,8 +202,8 @@ showParameters <- function(params,
              scales = list(x = list(relation = "free"),
                            y = list(relation="free", draw = FALSE)),
              data = params.df, scale = "free", as.table = TRUE, ...,
-             auto.key = list(place = "top",
-                             column = nlevels(params$Intervention)))
+             auto.key = list(space = "top",
+                             columns = nlevels(params$Intervention)))
     )
   )
 }
