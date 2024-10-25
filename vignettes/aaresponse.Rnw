@@ -853,7 +853,7 @@ aaParams.uncurated <- extractParameters(resultPaas)
 aaParams <- curateParameters(aaParams.uncurated)
 
 fullPoIs <- imputePoIs(supro, aaParams, quant = .2)
-head(fullPoIs)
+tail(fullPoIs)
 @ 
 
 The imputated values and the original PoIs from curve fitting are both
@@ -862,7 +862,9 @@ accessible in the result (with suffixes ``\code{.i}'' and
 columns. Figure~\ref{fig:imputedValues} shows the ranges of the two
 PoIs, their correlation with the imputed values, and the distributions
 of the imputed values that are actually used. The latter are very
-small in almost all cases, as they should be.
+small in almost all cases, as they should be. Using these imputed
+values in the comparison of the interventions then leads to the CIs shown in 
+Figure~\ref{fig:allCIs}.
 
 \begin{figure}[tb]
 \centering
@@ -894,12 +896,6 @@ finalResulta <- compareInterventions(fullPoIs, target = "AUC",
                                      logTransform = TRUE)
 finalResult2a <- compareInterventions(fullPoIs, target = "Height")
 @ 
-
-Using these imputed values then leads to the CIs shown in
-Figure~\ref{fig:allCIs}. These are virtually indistingishable from the
-CIs in Figure~\ref{fig:combinedCIs}, mainly because the number of
-missing values in this particular data set is very small. In other
-cases more differences will be visible.
 
 \begin{figure}[tb]
 \centering
