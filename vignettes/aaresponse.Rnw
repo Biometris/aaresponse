@@ -2,15 +2,10 @@
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{alsace}
 
+\usepackage[margin=2.54cm]{geometry}
 \usepackage{hyperref}
 \usepackage{natbib}
-\usepackage{geometry}
 \usepackage{layout}
-
-\geometry{
-  includeheadfoot,
-  margin=2.54cm
-}
 
 \DeclareGraphicsExtensions{.pdf, .png}
 
@@ -315,7 +310,7 @@ grid.arrange(pl1, pl2, ncol = 2)
 
 \begin{figure}[tb]
 \centering
-<<pcaL1,echo=FALSE,fig.height=8,fig.width=14,out.width='\\textwidth'>>=
+<<pcaL1,echo=FALSE,fig.height=9,fig.width=16.5,out.width='\\textwidth'>>=
 pl1 <- plotLoadings(PCApar1)
 pl2 <- plotLoadings(PCApar2)
 grid.arrange(pl1, pl2, ncol = 2)
@@ -842,10 +837,22 @@ estimating AUC and peak heights from quantiles of the time series
 data. A very good linear correlation exists
 between the difference of the .2 and .8 quintiles and peak height,
 which means we can use that to impute the \code{NA} values. For AUC
-the correlation is less good, but still usable. This works as follows:
+the correlation is less good, but still usable.
+
+To show how it works, we again look at the supro data, but instead of
+focusing on the totals (which contain very few missing values) we
+analyse the essential amino acids, and apply quite aggressice curation
+(in particular for the \code{c} parameter). For computational reasons we only
+include the two participants that show the highest number of missing values:
 
 <<imputeVals,echo=TRUE>>=
-fullPoIs <- imputePoIs(supro, allParams, quant = .2)
+idx <- which(supro$Participant %in% c(4, 9))
+resultPaas.uncurated <- fitWoodAll(supro, what = 'essentials')
+resultPaas <- curateFits(resultPaas.uncurated)
+aaParams.uncurated <- extractParameters(resultPaas)
+aaParams <- curateParameters(aaParams.uncurated)
+
+fullPoIs <- imputePoIs(supro, aaParams, quant = .2)
 head(fullPoIs)
 @ 
 

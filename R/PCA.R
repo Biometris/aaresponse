@@ -82,7 +82,7 @@ plotLoadings <- function(PCAobj, ...) {
     x <- as.numeric(rownames(loadings.df))
     xyplot(PC1 + PC2 ~ x, data = loadings.df, type = "l",
            xlab = "Time (min.)", ylab = "Loadings",
-           auto.key = list(space = "top" columns = 2,
+           auto.key = list(space = "top", columns = 2,
                            points = FALSE, lines = TRUE),
            panel = function(...) {
              panel.abline(h = 0, v = 0, lty = 2, col = "gray")
