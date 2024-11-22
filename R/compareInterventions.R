@@ -92,8 +92,8 @@ doComparisons <- function(fitModels, logTransform = FALSE, ...) {
   names(result.df)[2] <- "Estimate"
   result.df <-
     cbind(
-      data.frame(AA = factor(sapply(strsplit(rownames(result.df), "\\."),
-                                    "[[", 1)),
+      data.frame(AA = factor(rep(names(allConfInts),
+                                 sapply(allConfInts, nrow))),
                  Target = as.character(terms(fitModels[[1]]))[2]),
       result.df)
   rownames(result.df) <- NULL
