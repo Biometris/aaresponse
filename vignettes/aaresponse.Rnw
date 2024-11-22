@@ -1,6 +1,6 @@
 \documentclass[a4paper]{article}
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{alsace}
+%\VignetteIndexEntry{aaresponse}
 
 \usepackage[margin=2.54cm]{geometry}
 \usepackage{hyperref}
