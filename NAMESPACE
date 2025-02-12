@@ -21,7 +21,7 @@ S3method("[", "aar") # to avoid dropping certain attributes...
 export("checkAAdata", "showRawData",
        "doPCA", "plotScores", "plotLoadings",
        "fitWood", "fitWoodAll", "curateFits", "showDataFits",
-       "getAUC", "getHeight", "getTime2Max",
+       "getAUC", "getHeight", "getTime2Max", "PoItradAll",
        "summarizePoIs", "imputePoIs", "trapRule",
        "extractParameters", "curateParameters", "showParameters",
        "fitMixedModels", "testPeriodEffect", 

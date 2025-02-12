@@ -681,7 +681,14 @@ combination of a participant, an intervention, and an amino acid:
 
 <<summarizePois>>=
 head(summarizePoIs(allParams, "AUC"))
-@ 
+@
+
+Finally, it should be mentioned that the traditional way of obtaining
+PoIs -- i.e., without fitting Wood curves -- is available through
+function \code{PoItradAll}. It operates directly on the data frame
+containing the original data, and returns an object of class
+\code{'aar'}, just like the one obtained from
+\code{extractParameters}. Check the manual page for more information.
 
 \section{Comparison with a reference protein}
 Once we are happy with the general quality of the fits and the
