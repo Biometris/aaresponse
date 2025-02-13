@@ -69,6 +69,7 @@ curateParameters <- function(params,
                              Time2Max = c(15, 200),
                              Height = c(0, 1000),
                              AUC = c(0, Inf),
+                             allowNAs = FALSE,
                              verbose = TRUE) {
   if (missing(params)) {
     boundaryTable <- rbind(Time2Max, Height, AUC)
@@ -81,24 +82,35 @@ curateParameters <- function(params,
   if (length(attr(params, "aanames")) > 0 &
       length(attr(params, "totalnames")) > 0)
     warning("Applying the same curation boundaries to individual AAs and AA totals")
-  
-  bad.idx <-
-    is.na(params$Time2Max) | is.na(params$Height) | is.na(params$AUC) |
-    params$Time2Max < Time2Max[1] | params$Time2Max > Time2Max[2] |
-    params$Height < Height[1] | params$Height > Height[2] |
-    params$AUC < AUC[1] | params$AUC > AUC[2]
-  
-  params$Height[bad.idx] <- NA
-  params$AUC[bad.idx] <- NA
-  params$Time2Max[bad.idx] <- NA
 
-  if (verbose) {
-    nbad <- sum(bad.idx, na.rm = TRUE)
-    if (nbad > 0) {
-      message("Removed ", nbad, " parameter combinations")
-    }
+  if (allowNAs) {
+      height.idx <- params$Height < Height[1] | params$Height > Height[2]
+      auc.idx <- params$AUC < AUC[1] | params$AUC > AUC[2]
+      t2m.idx <- params$Time2Max < Time2Max[1] | params$Time2Max > Time2Max[2]
+
+      params$Height[height.idx] <- NA
+      params$AUC[auc.idx] <- NA
+      params$Time2Max[t2m.idx] <- NA
+
+      nbad <- sum(t2m.idx, auc.idx, height.idx)
+  } else {
+      bad.idx <- is.na(params$Time2Max) | is.na(params$Height) |
+          is.na(params$AUC) |
+          params$Time2Max < Time2Max[1] | params$Time2Max > Time2Max[2] |
+          params$Height < Height[1] | params$Height > Height[2] |
+          params$AUC < AUC[1] | params$AUC > AUC[2]
+  
+      params$Height[bad.idx] <- NA
+      params$AUC[bad.idx] <- NA
+      params$Time2Max[bad.idx] <- NA
+
+      nbad <- sum(bad.idx, na.rm = TRUE) * 3
   }
-
+  
+  if (verbose) {
+      message("Removed ", nbad, " parameter combinations")
+  }
+  
   params
 }
 

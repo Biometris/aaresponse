@@ -16,13 +16,19 @@
 curateFits(fitparams, aa = c(0, 1000), mm = c(0, 100), cc = c(0, 100),
            dd = c(0, 1000), verbose = TRUE)
 curateParameters(params, Time2Max = c(15, 200), Height = c(0, 1000),
-                 AUC = c(0, Inf), verbose = TRUE)
+                 AUC = c(0, Inf), allowNAs = FALSE, verbose = TRUE)
 }
 \arguments{
   \item{fitparams, params}{Data frame containing the fitted parameter
     values, or }
   \item{aa, mm, cc, dd, Time2Max, Height, AUC}{Vectors of minimal and
     maximal values.}
+  \item{allowNAs}{Logical, indicating whether some of the parameters may
+    be \code{NA} whereas others have a value. For parameters obtained
+    from curve fits, this always should be \code{FALSE}, which is also
+    the default. For traditional parameter estimates one can imagine
+    that it is possible to estimate peak position and peak height but
+    not AUC, so in such a case this should be set to \code{TRUE}.
   \item{verbose}{Logical, indicating whether feedback is given to the
     terminal about the number of curated records.}
 }
