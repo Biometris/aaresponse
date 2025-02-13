@@ -28,9 +28,9 @@ curateParameters(params, Time2Max = c(15, 200), Height = c(0, 1000),
     from curve fits, this always should be \code{FALSE}, which is also
     the default. For traditional parameter estimates one can imagine
     that it is possible to estimate peak position and peak height but
-    not AUC, so in such a case this should be set to \code{TRUE}.
+    not AUC, so in such a case this should be set to \code{TRUE}.}
   \item{verbose}{Logical, indicating whether feedback is given to the
-    terminal about the number of curated records.}
+    terminal about the number of curated entries.}
 }
 \value{A data.frame is returned where the parameter values in all rows
   violating the boundary conditions are set to NA.}

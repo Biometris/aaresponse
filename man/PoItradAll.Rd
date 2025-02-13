@@ -26,14 +26,15 @@ PoItradAll(aadata, what = c("all", "aas", "essentials", "totals"),
 }
 \details{The value of AUC is 1/15th of the value obtained by function
   \code{trapRule} to be consistent with the current AUC calculations by
-  the curve fitting method. This may be changed in the future.
+  the curve fitting method. This may be changed in the
+  future. \code{Time2Max} is given in the units that are the levels of
+  \code{aadata$Time}.
 }
 \author{
 Ron Wehrens
 }
 \seealso{
-  \code{\link{trapRule}}, \code{\link{extractParameters}},
-  \code{\link{showDataFits}}
+  \code{\link{trapRule}}}
 }
 \examples{
 data(supro)
