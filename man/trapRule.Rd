@@ -15,7 +15,7 @@
 \usage{
 trapRule(y, x = 1:length(y), maxT = max(x))
 tradHeight(y)
-tradT2M(y)
+tradT2M(y, x = 1:length(y))
 }
 \arguments{
   \item{y}{Height of the curve at different points.}

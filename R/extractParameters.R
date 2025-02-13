@@ -84,15 +84,18 @@ curateParameters <- function(params,
     warning("Applying the same curation boundaries to individual AAs and AA totals")
 
   if (allowNAs) {
-      height.idx <- params$Height < Height[1] | params$Height > Height[2]
-      auc.idx <- params$AUC < AUC[1] | params$AUC > AUC[2]
-      t2m.idx <- params$Time2Max < Time2Max[1] | params$Time2Max > Time2Max[2]
+      height.idx <- which(params$Height < Height[1] |
+                          params$Height > Height[2])
+      auc.idx <- which(params$AUC < AUC[1] |
+                       params$AUC > AUC[2])
+      t2m.idx <- which(params$Time2Max < Time2Max[1] |
+                       params$Time2Max > Time2Max[2])
 
-      params$Height[height.idx] <- NA
-      params$AUC[auc.idx] <- NA
-      params$Time2Max[t2m.idx] <- NA
+      if ((lheight <- length(height.idx)) > 0) params$Height[height.idx] <- NA
+      if ((lauc <- length(auc.idx)) > 0) params$AUC[auc.idx] <- NA
+      if ((lt2m <- length(t2m.idx)) > 0) params$Time2Max[t2m.idx] <- NA
 
-      nbad <- sum(t2m.idx, auc.idx, height.idx)
+      nbad <- lheight + lauc + lt2m
   } else {
       bad.idx <- is.na(params$Time2Max) | is.na(params$Height) |
           is.na(params$AUC) |

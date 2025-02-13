@@ -34,7 +34,7 @@ PoItradAll(aadata, what = c("all", "aas", "essentials", "totals"),
 Ron Wehrens
 }
 \seealso{
-  \code{\link{trapRule}}}
+  \code{\link{trapRule}}
 }
 \examples{
 data(supro)

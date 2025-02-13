@@ -1,12 +1,14 @@
 trapRule <- function(y, x = 1:length(y), maxT = max(x)) {
-  y <- y[x <= maxT]
-  x <- x[x <= maxT]
-  
-  dx <- diff(x)
-  dy <- abs(diff(y))
-  miny <- pmin(head(y, -1), tail(y, -1))
+    if (any(is.na(y))) return(NA)
 
-  sum(dx*(miny + dy/2)) - y[1]*diff(range(x))
+    y <- y[x <= maxT]
+    x <- x[x <= maxT]
+    
+    dx <- diff(x)
+    dy <- abs(diff(y))
+    miny <- pmin(head(y, -1), tail(y, -1))
+    
+    sum(dx*(miny + dy/2)) - y[1]*diff(range(x))
 }
 
 ## More elaborate function for obtaining Height in the classical
@@ -20,26 +22,24 @@ tradHeight <- function(y) {
 
     ntime <- length(y)
     
-    max.idx <- which.max(y, na.rm = TRUE)
-    if (is.na(y[max.idx - 1]) |
-        max.idx == ntime |
-        (max.idx < ntime & is.na(y[max.idx + 1])))
+    max.idx <- which.max(y)
+    if ((max.idx > 1 && is.na(y[max.idx - 1])) ||
+        (max.idx < ntime && is.na(y[max.idx + 1])))
         return(NA)
     
     y[max.idx] - y[1]
 }
 
-tradT2M <- function(y) {
+tradT2M <- function(y, x = 1:length(y)) {
     ntime <- length(y)
-    max.idx <- which.max(y, na.rm = TRUE)
+    max.idx <- which.max(y)
 
-    if (is.na(y[max.idx - 1]) |
-        max.idx == ntime |
-        (max.idx < ntime & is.na(y[max.idx + 1]))) {
+    if ((max.idx > 1 && is.na(y[max.idx - 1])) ||
+        (max.idx < ntime && is.na(y[max.idx + 1]))) {
 
         NA
     } else {
-        max.idx
+        x[max.idx]
     }
 }
 
@@ -74,13 +74,15 @@ PoItradAll <- function(aadata,
         aggregate(
             1:nrow(aadata.df),
             aadata.df[c("Participant", "AA", "Intervention", "Period")],
-            function(ii) # divide by 15 to be consistent with cf approach
+            function(ii) {
+                ## AUC: divide by 15 to be consistent with cf approach
                 c(AUC = trapRule(y = aadata.df[ii, "value"],
-                                 x = aadata.df[ii, "Time"],
-                                 maxT = maxT) / 15,
+                                   x = aadata.df[ii, "Time"],
+                                   maxT = maxT) / 15,
                   Height = tradHeight(aadata.df[ii, "value"]),
-                  Time2Max =
-                      levels(aadata.df$Time[tradT2M(aadata.df[ii, "value"])))))
+                  Time2Max = tradT2M(y = aadata.df[ii, "value"],
+                                     x = aadata.df[ii, "Time"]))
+            })
     
     finalresult <- cbind(result[,1:4], as.data.frame(result$x))
     attr(finalresult, "aanames") <- intersect(attr(aadata, "aanames"),
