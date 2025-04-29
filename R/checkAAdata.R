@@ -35,7 +35,7 @@ checkAAdata <- function(df, aanames, totalnames, quiet = FALSE) {
   allAAs <- c(foundAAs, foundTotals)
   NAA <- length(allAAs)
   if (NAA == 0)
-    stop("No amino-acid information found.")
+    stop("No information on response variables found.")
 
   if (max(df$Time) < 30)
     stop("Time should be recorded in minutes")
@@ -63,7 +63,7 @@ checkAAdata <- function(df, aanames, totalnames, quiet = FALSE) {
     cat("\nNumber of participants:", nlevels(df$Participant))
     cat("\nInterventions:", paste(levels(df$Intervention), sep = ", "))
     cat("\nTime range: from", min(df$Time), "to", max(df$Time), "minutes.\n")
-    cat("\nInformation on", NAA, "amino acids and aa totals:\n\t",
+    cat("\nInformation on", NAA, "response variables:\n\t",
         do.call(paste, args = list(AAstring, collapse = "\n\t ")), "\n\n")
   }
   
