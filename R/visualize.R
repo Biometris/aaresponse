@@ -295,12 +295,14 @@ showPoIs <- function(AUC = NULL, Height = NULL,
   }
 }
 
-showCIs <- function(resultsTable, ...) {
+showCIs <-
+    function(resultsTable,
+             ylab = expression(paste("AA level (", mu, "M)", sep = "")), ...) {
   standard <- ifelse(regexpr("/", resultsTable$contrast[1])[1] < 0, 0, 1)
   xlab <- ifelse(standard == 1, "Intervention / Ref", "Intervention - Ref")
   xyplot(AA ~ Estimate | contrast, data = resultsTable,
          main = resultsTable$Target[1],
-         ylab = "Amino acid", xlab = xlab, standard = standard,
+         ylab = ylab, xlab = xlab, standard = standard,
          panel = panel.ci, prepanel = prepanel.ci, as.table = TRUE,
          ux = resultsTable$upper.CL, lx = resultsTable$lower.CL, ...)
 }
