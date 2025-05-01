@@ -317,7 +317,7 @@ showCombinedCIs <- function(lAUC = NULL, AUC = NULL,
                             Height = NULL, Time2Max = NULL,
                             relevantAAs,
                             what = c("all", "aas", "essentials", "totals"),
-                            between, subset, ...) {
+                            between, subset, ylab = "Amino acid", ...) {
   what <- match.arg(what)
 
   pois <- list(lAUC = lAUC, AUC = AUC, Height = Height, Time2Max = Time2Max)
@@ -354,7 +354,7 @@ showCombinedCIs <- function(lAUC = NULL, AUC = NULL,
     combineLimits(
       xyplot(AA ~ Estimate | Target + Protein, data = pois.df,
              scale = list(x = "free"), as.table = TRUE,
-             xlab = "Intervention, reference comparison", ylab = "Amino acid",
+             xlab = "Intervention, reference comparison", ylab = ylab,
              panel = panel.ci, , prepanel = prepanel.ci,
              standard = pois.df$standard, between = between,
              subset = subset, ...,
