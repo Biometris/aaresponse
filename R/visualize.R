@@ -145,13 +145,16 @@ showDataFits <-
     periods <- unique(datf.df[subscripts, "Period"])
     mycols <- trellis.par.get("superpose.line")$col
     
+    ## in case of negative sample times, shift everything to the left
+    minTime <- attr(pardf$minTime)
+    
     params <-
       pardf[pardf$Participant == participant &
             pardf$AA == aa &
             pardf$Period %in% periods,]
     for (pp in 1:nrow(params)) {
       if (!any(is.na(params[pp, parameters])))
-        panel.lines(xx*15, woodFun(params[pp, parameters], xx),
+        panel.lines(xx*15 + minTime, woodFun(params[pp, parameters], xx),
                     col = mycols[as.integer(params[pp, "Intervention"])])
     }
   }

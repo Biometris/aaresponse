@@ -62,6 +62,10 @@ fitWoodAll <- function(aadata, what = c("all", "aas", "essentials", "totals")) {
   aadata.df$AA <- factor(aadata.df$AA) 
   aadata.df$Participant <- factor(aadata.df$Participant)
   aadata.df$Intervention <- factor(aadata.df$Intervention)
+
+  ## address negative time points
+  minTime <- min(0, min(aadata.df$Time))
+  if (minTime < 0) aadata.df$Time <- aadata.df$Time - minTime
   
   result <-
     aggregate(1:nrow(aadata.df),
@@ -74,6 +78,7 @@ fitWoodAll <- function(aadata, what = c("all", "aas", "essentials", "totals")) {
                                         levels(finalresult$AA))
   attr(finalresult, "totalnames") <- intersect(attr(aadata, "totalnames"),
                                            levels(finalresult$AA))
+  attr(finalresult, "minTime") <- minTime
   attr(finalresult, "class") <- attr(aadata, "class")
 
   finalresult

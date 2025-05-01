@@ -25,7 +25,7 @@ getHeight <- function(prs) {
   unname((prs[1]*prs[2]^(prs[2]*prs[3]) * exp(-(prs[2] * prs[3]))))
 }
 
-getTime2Max <- function(prs, minutes = TRUE) {
+getTime2Max <- function(prs, minutes = TRUE, minTime = 0) {
   required <- c("a", "m", "c", "d")
   if (is.null(names(prs)) & length(prs) == 4)
     names(prs) <- required
@@ -35,7 +35,7 @@ getTime2Max <- function(prs, minutes = TRUE) {
   if (is.list(prs)) prs <- unlist(prs)
   if (any(is.na(prs))) return(NA)
   
-  ifelse(minutes, prs[2]*15, prs[2])
+  ifelse(minutes, prs[2]*15 + minTime, prs[2] + minTime/15)
 }
 
 extractParameters <- function(prs.df, maxT = 300, minutes = TRUE) {
@@ -43,12 +43,14 @@ extractParameters <- function(prs.df, maxT = 300, minutes = TRUE) {
   if (!all(required %in% names(prs.df)))
     stop("Required information absent")
   ddff <- prs.df[required]
-    
+
+  minTime <- attr(prs.df, "minTime")
+  
   paramResult <-
     as.data.frame(
       cbind(apply(ddff, 1, getAUC, maxT = maxT),
             apply(ddff, 1, getHeight),
-            apply(ddff, 1, getTime2Max, minutes = minutes)))
+            apply(ddff, 1, getTime2Max, minutes = minutes, minTime = minTime)))
   names(paramResult) <- c("AUC", "Height", "Time2Max")
 
   additional <- c("Participant", "Intervention", "AA", "Period")
