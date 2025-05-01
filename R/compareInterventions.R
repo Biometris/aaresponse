@@ -88,7 +88,7 @@ doComparisons <- function(fitModels, logTransform = FALSE, ...) {
   
   allConfInts <- lapply(results, myconfint, ...)
   allConfInts <- allConfInts[!sapply(allConfInts, function(x) all(is.na(x)))]
-  result.df <- as.data.frame(do.call(rbind, allConfInts))
+  result.df <- as.data.frame(do.call(rbind.data.frame, allConfInts))
   names(result.df)[2] <- "Estimate"
   result.df <-
     cbind(
@@ -114,7 +114,8 @@ compareInterventions <-
            respondersOnly = TRUE, ...)
 {
   model.terms <- trimws(strsplit(model.formula, "\\+")[[1]])
-
+  model.terms <- gsub("[^A-Za-z]", "", model.terms)
+  
   model.formula <- formula(paste(target, model.formula, collapse = " "))
   lm.alternative <- formula(paste(target, lm.alternative, collapse = " "))
 
