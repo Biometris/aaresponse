@@ -135,9 +135,12 @@ showDataFits <-
     pardf$d <- 0.0
   }
 
+  ## in case of negative sample times, shift fitted curves to the left
+  minTime <- attr(pardf, "minTime")
+    
   ## added selection on period in params
   mypanel <- function(x, y, ..., groups, subscripts) {
-    xx <- seq(min(x), max(x), length = 50)/15
+    xx <- seq(min(x), max(x), length = 200)/15
     panel.xyplot(x, y, groups = groups, type = mytype,
                  subscripts = subscripts, ...)
     aa <- as.character(datf.df[subscripts[1], "AA"])
@@ -145,16 +148,16 @@ showDataFits <-
     periods <- unique(datf.df[subscripts, "Period"])
     mycols <- trellis.par.get("superpose.line")$col
     
-    ## in case of negative sample times, shift everything to the left
-    minTime <- attr(pardf$minTime)
-    
     params <-
       pardf[pardf$Participant == participant &
             pardf$AA == aa &
             pardf$Period %in% periods,]
+
     for (pp in 1:nrow(params)) {
       if (!any(is.na(params[pp, parameters])))
-        panel.lines(xx*15 + minTime, woodFun(params[pp, parameters], xx),
+          panel.lines(xx*15,
+                      aaresponse:::woodFun(params[pp, parameters],
+                                           xx - minTime/15),
                     col = mycols[as.integer(params[pp, "Intervention"])])
     }
   }
