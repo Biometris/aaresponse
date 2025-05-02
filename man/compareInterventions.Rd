@@ -11,7 +11,7 @@ compareInterventions(
   logTransform = FALSE,
   model.formula = "~ Period + Intervention + (1 | Participant)",
   lm.alternative = "~ Period + Intervention",
-  mainFun = lme4:::lmer, singularFun = lm, respondersOnly = TRUE, ...)
+  mainFun = lme4::lmer, singularFun = lm, respondersOnly = TRUE, ...)
 }
 \arguments{
   \item{dt}{A data frame with at least the columns in the \code{target},

@@ -16,7 +16,7 @@ return the parameter of interest.
 \usage{
 getAUC(prs, maxT = 300)
 getHeight(prs)
-getTime2Max(prs, minutes = TRUE)
+getTime2Max(prs, minutes = TRUE, minTime = 0)
 extractParameters(prs.df, maxT = 300, minutes = TRUE)
 }
 \arguments{
@@ -28,12 +28,14 @@ extractParameters(prs.df, maxT = 300, minutes = TRUE)
     minutes.} 
   \item{minutes}{Whether the time to the peak maximum should be
     expressed in minutes. Default is TRUE.}
+  \item{minTime}{The earliest time point, which may be negative.}
 }
 \value{The simple extraction functions return scalars, function
   \code{extractParameters} returns an object of class 'aar'.}
 \author{Ron Wehrens}
 \seealso{
-  \code{\link{checkAAdata}}, \code{\link{extractParameters}}, \code{\link{showCIs}}
+  \code{\link{checkAAdata}}, \code{\link{fitWood}},
+  \code{\link{extractParameters}}, \code{\link{showCIs}}
 }
 \examples{
 \dontrun{

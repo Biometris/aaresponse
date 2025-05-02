@@ -5,7 +5,7 @@
 Fit a Wood curve through a time series.
 }
 \description{
-A Wood curve is given by y(t) = d + a t^{mc} e^{-ct} where d is the
+A Wood curve is given by \eqn{y(t) = d + a t^{mc} e^{-ct}} where d is the
 baseline, m is the time to the maximum, c is related to the rise and
 fall of the curve, and a to the height. The fit is done by numerical
 optimization using 500 random starts. In normal usage the \code{fitWood}
@@ -29,6 +29,11 @@ fitWoodAll(aadata, what = c("all", "aas", "essentials", "totals"))
   Participant, Period, Intervention and AA (using \code{aggregate}). Its
   result is an object of class "aar".
 }
+\details{Time values in Wood curves need to be non-negative. In
+  practice, sampling points may occur before t=0, the administration of
+  the treatment. Internally this is solved by simply setting the
+  earliest time point to zero for the curves, and shifting back in the
+  calculation of the parameters of interest, and in making figures.}
 \references{
 P.D.P. Wood, Algebraic model of the lactation curve in cattle. Nature
 216:164-165 (1967)

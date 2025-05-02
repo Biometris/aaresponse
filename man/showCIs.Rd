@@ -9,9 +9,11 @@
   parameters of interest, AUC, peak height, and time to peak maximum. 
 }
 \usage{
-showCIs(resultsTable, ...)
+showCIs(resultsTable,
+        ylab = expression(paste("AA level (", mu, "M)", sep = "")), ...)
 showCombinedCIs(lAUC = NULL, AUC = NULL, Height = NULL, Time2Max = NULL,
-                relevantAAs, what, between, subset, ...)
+                relevantAAs, what = c("all", "aas", "essentials", "totals"),
+                between, subset, ylab = "Amino acid", ...)
 }
 \arguments{
   \item{resultsTable, lAUC, AUC, Height, Time2Max}{An object generated
@@ -29,7 +31,7 @@ showCombinedCIs(lAUC = NULL, AUC = NULL, Height = NULL, Time2Max = NULL,
     results on a ratio scale from the other PoIs that are always on a
     difference scale.}
   \item{subset}{Optional definition of a subset of amino acids.}
-  \item{\dots}{Additional arguments to the underlying plot function,
+  \item{ylab,\dots}{Additional arguments to the underlying plot function,
     most often used to define a subset of the results to be displayed
     (see examples).}
 }

@@ -477,6 +477,16 @@ starting points and quite generous optimization boundaries to avoid
 missing the true optimum. The result is a named vector, also containing
 the RMS value of the fit.
 
+As of version 1.0.4 of the package, it is possible to have time points
+that are sampled before $t = 0$ -- this is a very useful strategy
+since it adds to the reliability of the estimates of the
+baselines. The Wood curves, however, require non-negative time
+values. Therefore, in cases with negative time points, the time axis is
+shifted in the fitting of the Wood curves so that the first time point
+equals $t = 0$. Again, this means that the Wood curve parameters need
+to be interpreted on a different scale than the data. This is relevant
+in plotting, for example, and in extracting PoIs (see below).
+
 Function \code{fitWood} is useful to assess individual cases, but will
 rarely be used directly -- in
 principle one will want to fit all curves in a data set. This can

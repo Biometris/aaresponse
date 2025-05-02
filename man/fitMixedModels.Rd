@@ -10,7 +10,7 @@
 \usage{
 fitMixedModels(dt, refIntervention,
                model.formula, lm.alternative,
-               mainFun = lme4:::lmer, respondersOnly = TRUE)
+               mainFun = lme4::lmer, respondersOnly = TRUE)
 }
 \arguments{
   \item{dt}{Data frame containing the relevant information.}

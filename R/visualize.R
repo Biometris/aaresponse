@@ -156,8 +156,7 @@ showDataFits <-
     for (pp in 1:nrow(params)) {
       if (!any(is.na(params[pp, parameters])))
           panel.lines(xx*15,
-                      aaresponse:::woodFun(params[pp, parameters],
-                                           xx - minTime/15),
+                      woodFun(params[pp, parameters], xx - minTime/15),
                     col = mycols[as.integer(params[pp, "Intervention"])])
     }
   }
