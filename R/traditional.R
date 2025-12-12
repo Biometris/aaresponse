@@ -34,7 +34,7 @@ tradT2M <- function(y, x = 1:length(y)) {
     ntime <- length(y)
     max.idx <- which.max(y)
 
-    if (is.na(max.idx) ||
+    if (all(is.na(y)) ||
         (max.idx > 1 && is.na(y[max.idx - 1])) ||
         (max.idx < ntime && is.na(y[max.idx + 1]))) {
 
