@@ -1,5 +1,24 @@
-trapRule <- function(y, x = 1:length(y), maxT = max(x)) {
-    if (any(is.na(y))) return(NA)
+imputePreZero <- function(y, x) {
+    ## NA values are allowed at or before t=0, if other points in that
+    ## time range are non-NA
+    prezero <- which(x <= 0)
+
+    if (!all(is.na(y[prezero]))) {
+        if (na.idx <- which(is.na(y[prezero]))) {
+            nonna.idx <- prezero[-na.idx]
+            y[na.idx] <- mean(y[nonna.idx])
+        }
+    }
+
+    y
+}
+
+trapRule <- function(y, x = 1:length(y), maxT = max(x),
+                     imputePreZero = TRUE) {
+    if (imputePreZero)
+        y <- imputePreZero(y, x)
+    
+    ## if (any(is.na(y))) return(NA)
 
     y <- y[x <= maxT]
     x <- x[x <= maxT]
@@ -14,10 +33,15 @@ trapRule <- function(y, x = 1:length(y), maxT = max(x)) {
 ## More elaborate function for obtaining Height in the classical
 ## way. Basically the difference between the highest point and the
 ## first point. This function introduces ways to allow for some NAs.
-## These are not allowed at the first point or next to the maximum,
-## but are allowed elsewhere - in these cases NA is returned. If the
+## These are not allowed at points before or at zero (unless
+## imputePreZero == TRUE), or next to the maximum,
+## but are allowed elsewhere. In the cases where NA is not allowed,
+## the function returns NA. If the
 ## maximum is at the final time point NA is returned as well.
-tradHeight <- function(y) {
+tradHeight <- function(y, x = 1:length(y), imputePreZero = TRUE) {
+    if (imputePreZero)
+        y <- imputePreZero(y, x)
+    
     if (is.na(y[1])) return(NA)
 
     ntime <- length(y)
@@ -30,7 +54,10 @@ tradHeight <- function(y) {
     y[max.idx] - y[1]
 }
 
-tradT2M <- function(y, x = 1:length(y)) {
+tradT2M <- function(y, x = 1:length(y), imputePreZero = TRUE) {
+    if (imputePreZero)
+        y <- imputePreZero(y, x)
+
     ntime <- length(y)
     max.idx <- which.max(y)
 
@@ -52,7 +79,7 @@ tradT2M <- function(y, x = 1:length(y)) {
 
 PoItradAll <- function(aadata,
                        what = c("all", "aas", "essentials", "totals"),
-                       maxT) {
+                       maxT, imputePreZero = TRUE) {
     what <- match.arg(what)
     relVars <- switch(what,
                       aas = attr(aadata, "aanames"),
@@ -78,11 +105,15 @@ PoItradAll <- function(aadata,
             function(ii) {
                 ## AUC: divide by 15 to be consistent with cf approach
                 c(AUC = trapRule(y = aadata.df[ii, "value"],
-                                   x = aadata.df[ii, "Time"],
-                                   maxT = maxT) / 15,
-                  Height = tradHeight(aadata.df[ii, "value"]),
+                                 x = aadata.df[ii, "Time"],
+                                 maxT = maxT,
+                                 imputePreZero = imputePreZero) / 15,
+                  Height = tradHeight(y = aadata.df[ii, "value"],
+                                      x = aadata.df[ii, "Time"],
+                                      imputePreZero = imputePreZero),
                   Time2Max = tradT2M(y = aadata.df[ii, "value"],
-                                     x = aadata.df[ii, "Time"]))
+                                     x = aadata.df[ii, "Time"],
+                                     imputePreZero = imputePreZero))
             })
     
     finalresult <- cbind(result[,1:4], as.data.frame(result$x))
