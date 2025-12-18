@@ -4,15 +4,20 @@ imputePreZero <- function(y, x) {
     prezero <- which(x <= 0)
 
     if (!all(is.na(y[prezero]))) {
-        if (na.idx <- which(is.na(y[prezero]))) {
+        if (any(is.na(y[prezero]))) {
+            na.idx <- which(is.na(y[prezero]))
             nonna.idx <- prezero[-na.idx]
             y[na.idx] <- mean(y[nonna.idx])
         }
     }
-
+    
     y
 }
 
+## As the baseline, the first value in y is taken.
+## Update Dec 18 2025: not the first point is taken as the baseline,
+## but the average of all points at or before t=0. If x[1] > 0, then
+## the first point is taken, indeed.
 trapRule <- function(y, x = 1:length(y), maxT = max(x),
                      imputePreZero = TRUE) {
     if (imputePreZero)
@@ -27,7 +32,9 @@ trapRule <- function(y, x = 1:length(y), maxT = max(x),
     dy <- abs(diff(y))
     miny <- pmin(head(y, -1), tail(y, -1))
     
-    sum(dx*(miny + dy/2)) - y[1]*diff(range(x))
+    zero.idx <- ifelse(all(x > 0), 1, which(x <= 0))
+
+    sum(dx*(miny + dy/2)) - y[zero.idx]*diff(range(x))
 }
 
 ## More elaborate function for obtaining Height in the classical
@@ -38,6 +45,10 @@ trapRule <- function(y, x = 1:length(y), maxT = max(x),
 ## but are allowed elsewhere. In the cases where NA is not allowed,
 ## the function returns NA. If the
 ## maximum is at the final time point NA is returned as well.
+
+## Update Dec 18 2025: not the first point is taken as the baseline,
+## but the average of all points at or before t=0. If x[1] > 0, then
+## the first point is taken, indeed.
 tradHeight <- function(y, x = 1:length(y), imputePreZero = TRUE) {
     if (imputePreZero)
         y <- imputePreZero(y, x)
@@ -50,8 +61,10 @@ tradHeight <- function(y, x = 1:length(y), imputePreZero = TRUE) {
     if ((max.idx > 1 && is.na(y[max.idx - 1])) ||
         (max.idx < ntime && is.na(y[max.idx + 1])))
         return(NA)
+
+    zero.idx <- ifelse(all(x > 0), 1, which(x <= 0))
     
-    y[max.idx] - y[1]
+    y[max.idx] - y[zero.idx]
 }
 
 tradT2M <- function(y, x = 1:length(y), imputePreZero = TRUE) {
