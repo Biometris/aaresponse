@@ -46,22 +46,23 @@ fitMixedModels <-
 }
 
 testPeriodEffect <- function(fitModels) {
-  doPeriodTests <- function(mFit) {
-    mFit <- emmeans(mFit, c("Intervention", "Period"))
-    joint_tests(mFit)
-  }
-  
-  emTests <- lapply(fitModels, doPeriodTests)
-  pvals <- lapply(emTests, "[[", "p.value")
-  pvalsPeriod <- sapply(pvals, function(x) if (length(x) == 2) x[2] else NA)
-  if (any(naP <- which(is.na(pvalsPeriod))))
-    warning(paste("No period p values could be calculated for",
-                  names(emTests)[naP], "\n"))
-  if (any(smallP <- which(p.adjust(pvalsPeriod, "BH") < .05)))
-    warning(paste("Period significant in these cases:",
-                  names(emTests)[smallP]))
+    doPeriodTests <- function(mFit) {
+        mFit <- emmeans(mFit, c("Intervention", "Period"))
+        joint_tests(mFit)
+    }
 
-  pvalsPeriod
+    ## If no fit can be made a model with class NULL is in the list
+    emTests <- lapply(fitModels[!sapply(fitModels, is.null)], doPeriodTests)
+    pvals <- lapply(emTests, "[[", "p.value")
+    pvalsPeriod <- sapply(pvals, function(x) if (length(x) == 2) x[2] else NA)
+    if (any(naP <- which(is.na(pvalsPeriod))))
+        warning(paste("No period p values could be calculated for",
+                      names(emTests)[naP], "\n"))
+    if (any(smallP <- which(p.adjust(pvalsPeriod, "BH") < .05)))
+        warning(paste("Period significant in these cases:",
+                      names(emTests)[smallP]))
+    
+    pvalsPeriod
 }  
 
 doComparisons <- function(fitModels, logTransform = FALSE, ...) {
