@@ -130,6 +130,10 @@ compareInterventions <-
 
   if ("Period" %in% model.terms)
     periodPvals <- testPeriodEffect(fitModels)
+
+  ## levels can get reordered - repair
+  result <- doComparisons(fitModels, logTransform, ...)
+  result$AA <- factor(result$AA, levels = levels(dt$AA))
   
-  doComparisons(fitModels, logTransform, ...)
+  result
 }

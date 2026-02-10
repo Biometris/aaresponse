@@ -354,7 +354,7 @@ showCombinedCIs <- function(lAUC = NULL, AUC = NULL,
       xyplot(AA ~ Estimate | Target + Protein, data = pois.df,
              scale = list(x = "free"), as.table = TRUE,
              xlab = "Intervention, reference comparison", ylab = ylab,
-             panel = panel.ci, , prepanel = prepanel.ci,
+             panel = panel.ci, prepanel = prepanel.ci,
              standard = pois.df$standard, between = between,
              subset = subset, ...,
              lx = pois.df$lower.CL, ux = pois.df$upper.CL)
