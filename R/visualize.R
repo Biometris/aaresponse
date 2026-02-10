@@ -341,7 +341,8 @@ showCombinedCIs <- function(lAUC = NULL, AUC = NULL,
   pois.df$standard[sapply(pois.df$contrast,
                           function(x) regexpr("/", x)[1] > 0)] <- 1
   pois.df$Protein <-
-    factor(sapply(strsplit(as.character(pois.df$contrast), "[/-]"), "[[", 1))
+      factor(sapply(lapply(strsplit(as.character(pois.df$contrast), "[/-]"),
+                           trimws), "[[", 1))
 
   if (missing(between)) {
     between <- rep(0, length(pois))
