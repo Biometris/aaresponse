@@ -65,7 +65,8 @@ testPeriodEffect <- function(fitModels) {
     pvalsPeriod
 }  
 
-doComparisons <- function(fitModels, logTransform = FALSE, ...) {
+doComparisons <- function(fitModels, logTransform = FALSE,
+                          method = "trt.vs.ctrl",  ...) {
   doEMmeans <- function(mFit, logT) {
     if (logT) {
       regrid(emmeans(mFit, "Intervention"), transform = "log")
@@ -75,7 +76,7 @@ doComparisons <- function(fitModels, logTransform = FALSE, ...) {
   }
 
   emMods <- lapply(fitModels, doEMmeans, logT = logTransform)
-  results <- lapply(emMods, contrast, method = "trt.vs.ctrl",
+  results <- lapply(emMods, contrast, method = method,
                     type = "response")
   ## sometimes p values are NaNs leading to errors, so we have to
   ## check for that
@@ -90,6 +91,8 @@ doComparisons <- function(fitModels, logTransform = FALSE, ...) {
   allConfInts <- lapply(results, myconfint, ...)
   allConfInts <- allConfInts[!sapply(allConfInts, function(x) all(is.na(x)))]
   result.df <- as.data.frame(do.call(rbind.data.frame, allConfInts))
+  result.df$"p.value" <-
+      c(sapply(results, function(x) as.data.frame(x)[,"p.value"]))
   names(result.df)[2] <- "Estimate"
   result.df <-
     cbind(
@@ -112,7 +115,7 @@ compareInterventions <-
            model.formula = "~ Period + Intervention + (1 | Participant)",
            lm.alternative = "~ Period + Intervention",
            mainFun = lme4::lmer, singularFun = lm,
-           respondersOnly = TRUE, ...)
+           respondersOnly = TRUE, method = "trt.vs.ctrl", ...)
 {
   model.terms <- trimws(strsplit(model.formula, "\\+")[[1]])
   model.terms <- gsub("[^A-Za-z]", "", model.terms)
@@ -132,7 +135,7 @@ compareInterventions <-
     periodPvals <- testPeriodEffect(fitModels)
 
   ## levels can get reordered - repair
-  result <- doComparisons(fitModels, logTransform, ...)
+  result <- doComparisons(fitModels, logTransform, method = method, ...)
   result$AA <- factor(result$AA, levels = levels(dt$AA))
   
   result
