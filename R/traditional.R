@@ -31,10 +31,14 @@ trapRule <- function(y, x = 1:length(y), maxT = max(x),
     dx <- diff(x)
     dy <- abs(diff(y))
     miny <- pmin(head(y, -1), tail(y, -1))
-    
-    zero.idx <- ifelse(all(x > 0), 1, which(x <= 0))
 
-    sum(dx*(miny + dy/2)) - y[zero.idx]*diff(range(x))
+    if (all(x > 0)) {
+        zero.idx <- 1
+    } else {
+        zero.idx <- which(x <= 0)
+    }
+
+    sum(dx*(miny + dy/2)) - mean(y[zero.idx])*diff(range(x))
 }
 
 ## More elaborate function for obtaining Height in the classical
